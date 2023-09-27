@@ -1,4 +1,5 @@
 #include <iostream>
+#include <bitset>
 
 int div1(int n);
 int div2(int n, int i);
@@ -15,6 +16,7 @@ template <typename T>
 void switchValue(T &v1, T &v2);
 template <typename T>
 void switchValueXor(T &v1, T &v2);
+unsigned int inversion(unsigned int n);
 
 int main(){
 
@@ -49,10 +51,15 @@ int main(){
 
     // // 6.
     // std::cout << "\n\nQuestion 6\n" << "test: " << deplacementBit(10, 2) << "\n";
-    unsigned int val = 0x000000ff,
-                 offset = 4;
-    printf("\nQuestion 6\nDeplacement de 0x%x de %d bits : 0x%x\n", val, offset, deplacementBitV4(val, offset));
+    // unsigned int val = 0x000000ff,
+    //              offset = 4;
+    // printf("\nQuestion 6\nDeplacement de 0x%x de %d bits : 0x%x\n", val, offset, deplacementBitV4(val, offset));
 
+    // 7
+    std::bitset<sizeof(unsigned int) *8> nombre_binaire(42);
+    std::cout << "nQuestion 7\nInversion de " << nombre_binaire << " : " <<  std::bitset<sizeof(unsigned int) *8>(inversion(42)) << "\n";
+
+    
     // //TEST
     // unsigned int test = 0;
     // while(test < 10)
@@ -136,39 +143,6 @@ unsigned int mult(unsigned int n, unsigned int k)
     return somme;
 }
 
-int find1(unsigned int n)
-{
-
-}
-
-unsigned int incremente(unsigned int i)
-{
-    if(! (i & 1) )
-    {
-        // le dernier bit est un 0
-        i = i | 1;
-    }
-    else{
-        // il faut trouver le 1er bit à 0
-        unsigned int count = 0;
-        while( i&1 )
-        {
-            i>>1;
-            if(count&1)
-            {
-                // count est pair
-                count = count | 1;
-            }
-            else
-            {
-
-            }
-        }
-        
-    }
-
-    return i;
-}
 
 unsigned int deplacementBit(unsigned int n, unsigned int k)
 {
@@ -262,4 +236,9 @@ unsigned int deplacementBitV3(unsigned int n, unsigned int k)
 unsigned int deplacementBitV4(unsigned int n, unsigned int k)
 {
     return (n << (32-k)) | (n>>k);
+}
+
+unsigned int inversion(unsigned int n)
+{
+    return n ^ 0xFFFFFFFF;  
 }
