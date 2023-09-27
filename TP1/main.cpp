@@ -2,14 +2,19 @@
 
 int div1(int n);
 int div2(int n, int i);
+unsigned int div3(unsigned int n, unsigned int i);
 int mult(int n);
-int mult(int n, int k);
+unsigned int mult(unsigned int n, unsigned int k);
 unsigned int deplacementBit(unsigned int n, unsigned k);
 unsigned int decremente(unsigned int i);
 unsigned int incremente(unsigned int i);
 unsigned int deplacementBit(unsigned int n, unsigned int k);
 unsigned int deplacementBitV2(unsigned int n, unsigned int k);
 unsigned int deplacementBitV4(unsigned int n, unsigned int k);
+template <typename T>
+void switchValue(T &v1, T &v2);
+template <typename T>
+void switchValueXor(T &v1, T &v2);
 
 int main(){
 
@@ -22,7 +27,7 @@ int main(){
     // std::cout << "float \t\t:" <<  sizeof(float) <<"\n";
     // std::cout << "double \t\t:" << sizeof(double) <<"\n";
 
-    // // 2.
+    // 2.
     // int val1 = 435435,
     //     val2 = 324436493;
     
@@ -30,24 +35,23 @@ int main(){
     // std::cout<<"val1: "<< val1 << "\t val2: " << val2 << std::endl;
 
     // // Permutation de valeur
-    // val1 += val2;
-    // val2 = val1 -val2;
-    // val1 -= val2;
-
+    // switchValueXor(val1, val2);
     // std::cout<< "ensuite:\n";
     // std::cout<<"val1: "<< val1 << "\t val2: " << val2 << std::endl;
 
     // // 3.
 
-    // std::cout << "\n\nQuestion 3\n" << "Division de 2 par 2: " << div1(2);
-    // std::cout << "\n\nQuestion 4\n" << "Division de 8 par 2²: " << div2(8, 2);
-    // std::cout << "\n\nQuestion 5\n" << "Multiplication de 8 par 2: " << mult(8);
-    // std::cout << "\n\nQuestion 5-2\n" << "Multiplication de 8 par 32: " << mult(8, 32);
+    // std::cout << "\nQuestion 3\n" << "Division de 2 par 2: " << div1(2) << "\n";
+    // std::cout << "\nQuestion 3-2\n" << "Division de 8 par 2²: " << div2(8, 2) << "\n";
+    // std::cout << "\nQuestion 4\n" << "reste de 7 par 2²: " << div3(7, 2) << "\n";
+    // std::cout << "\nQuestion 5\n" << "Multiplication de 8 par 2: " << mult(8) << "\n";
+    // std::cout << "\nQuestion 5-2\n" << "Multiplication de 8 par 32: " << mult(8, 32) << "\n";
 
     // // 6.
     // std::cout << "\n\nQuestion 6\n" << "test: " << deplacementBit(10, 2) << "\n";
-
-    printf("%x %x\n", 1, deplacementBitV4(0x1, 5));
+    unsigned int val = 0x000000ff,
+                 offset = 4;
+    printf("\nQuestion 6\nDeplacement de 0x%x de %d bits : 0x%x\n", val, offset, deplacementBitV4(val, offset));
 
     // //TEST
     // unsigned int test = 0;
@@ -59,6 +63,24 @@ int main(){
 
     std::cout<<"\n";
     return 0;
+}
+
+
+template <typename T>
+void switchValueXor(T &v1, T &v2)
+{
+    v1 = v1 ^ v2;
+    v2 = v1 ^ v2;
+    v1 = v1 ^ v2;
+}
+
+
+template <typename T>
+void switchValue(T &v1, T &v2)
+{
+    v1 += v2;
+    v2 = v1 - v2;
+    v1 = v1 - v2;
 }
 
 
@@ -74,24 +96,44 @@ int div2(int n, int i)
     return n >> i;
 }
 
+unsigned int div3(unsigned int n, unsigned int i)
+{
+    // n: entier positif pair
+    // i: entier positif
+    // int reste = 0xFFFFFFFF >> (32 - i);
+    // return reste & n;
+    return (n << (32-i)) >> (32 -i);
+}
+
 int mult(int n)
 {
     // n entier positif
     return n<<1;
 }
 
-int mult(int n, int k)
+unsigned int mult(unsigned int n, unsigned int k)
 {
     // n entier positif par
     // k nombre creux
-    while(!(k & 1))
+
+    // On va decomposer k en une somme de puissance de 2 
+    // Ex: k = 6 et n = 2 => k = 0110 et n = 0010
+    // On fait n * ( 4 + 2) ce qui revient à faire n * (2² + 2¹)
+    // de cette manière on pourra utiliser l'opérateur >> et << pour multiplier
+    unsigned int somme = 0,
+                 puissance_2 = 0;
+    while(k)
     {
-        // n est pair
-        k = div1(k);
-        n = mult(n);
+        if(k & 1)
+        {
+            somme += n << puissance_2;
+        }
+
+        k >>= 1;
+        puissance_2++;
     }
 
-    return n;
+    return somme;
 }
 
 int find1(unsigned int n)
@@ -219,5 +261,5 @@ unsigned int deplacementBitV3(unsigned int n, unsigned int k)
 
 unsigned int deplacementBitV4(unsigned int n, unsigned int k)
 {
-    return (n << (31-k)) | (n>>k);
+    return (n << (32-k)) | (n>>k);
 }
