@@ -2,6 +2,7 @@
 #include <bitset>
 #include <cstdlib>
 
+
 int div1(int n);
 int div2(int n, int i);
 unsigned int div3(unsigned int n, unsigned int i);
