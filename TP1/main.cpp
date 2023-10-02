@@ -26,7 +26,12 @@ void fillTab(T tab[], unsigned int nb_cases);
 template <typename T>
 void afficheTab(T tab[][5], unsigned int nb_lignes, unsigned int nb_colonnes);
 template <typename T>
+void afficheTab(T tab[][1], unsigned int nb_lignes, unsigned int nb_colonnes);
+template <typename T>
 void afficheTab(T tab[], unsigned int nb_cases);
+template <typename T>
+void prodMat(T tab[][5], T vect[5], T res[][1], unsigned int nb_lignes, unsigned int nb_colonnes);
+
 
 int main()
 {
@@ -73,7 +78,7 @@ int main()
 
     // 8
     unsigned int t1[5][5],
-        t2[25],
+        t2[5],
         **t3 = new unsigned int *[5];
     
     
@@ -88,18 +93,16 @@ int main()
 
     // 9
 
+    unsigned int res[5][1];
     fillTab(t1, 5, 5);
-    fillTab(t2, 25);
+    fillTab(t2, 5);
 
     afficheTab(t1, 5, 5);
-    afficheTab(t2, 25);
-    // //TEST
-    // unsigned int test = 0;
-    // while(test < 10)
-    // {
-    //     std::cout<< "test: " << test << std::endl;
-    //     test = incremente(test);
-    // }
+    afficheTab(t2, 5);
+    
+    prodMat(t1, t2, res, 5, 5);
+    afficheTab(res, 5, 1);
+
 
     std::cout << "\n";
     return 0;
@@ -309,6 +312,20 @@ void afficheTab(T tab[][5], unsigned int nb_lignes, unsigned int nb_colonnes)
 }
 
 template <typename T>
+void afficheTab(T tab[][1], unsigned int nb_lignes, unsigned int nb_colonnes)
+{
+    std::cout << "Tab:\n";
+    for (unsigned int i = 0; i < nb_lignes; i++)
+    {
+        for (unsigned int j = 0; j < nb_colonnes; j++)
+        {
+            std::cout << tab[i][j] << " ";
+        }
+        std::cout << "\n";
+    }
+}
+
+template <typename T>
 void afficheTab(T tab[], unsigned int nb_cases)
 {
     std::cout << "Tab:\n";
@@ -317,4 +334,28 @@ void afficheTab(T tab[], unsigned int nb_cases)
         std::cout << tab[i] << " ";
     }
     std::cout << "\n";
+}
+
+template <typename T>
+T prodScalaire(T tab[][5], T vect[5], unsigned int nb_colonnes, unsigned int i_ligne)
+{
+    T sum = 0;
+    for(unsigned int i=0; i<nb_colonnes; i++)
+    {
+        sum += mult(tab[i_ligne][i], vect[i]); 
+    }
+
+    return sum;
+}
+
+template <typename T>
+void prodMat(T tab[][5], T vect[5], T res[][1], unsigned int nb_lignes, unsigned int nb_colonnes)
+{
+    for(unsigned int i=0; i<nb_lignes; i++)
+    {
+        for(unsigned int j=0; j<nb_colonnes; j++)
+        {
+            res[i][j] = prodScalaire(tab, vect, nb_colonnes, i);
+        }
+    }
 }
