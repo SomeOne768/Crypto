@@ -55,11 +55,11 @@ public:
     // Calcul for each caractere: d = j + (c - j) [26]
 
     int indice_key = 0;
-    for(auto letter : text)
+    for(char letter : text)
     {
       // converting into base 26:
       // key and cypher letter
-      int j = key.c_str()[indice_key] - 'A',
+      int j = key[indice_key] - 'A',
           c = letter - 'A';
 
       // decypher letter
