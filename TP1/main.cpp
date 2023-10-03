@@ -32,7 +32,6 @@ void afficheTab(T tab[], unsigned int nb_cases);
 template <typename T>
 void prodMat(T tab[][5], T vect[5], T res[][1], unsigned int nb_lignes, unsigned int nb_colonnes);
 
-// Commentaire REMI
 
 int main()
 {
