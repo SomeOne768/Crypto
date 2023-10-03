@@ -20,22 +20,26 @@ public:
   }
  
   string encrypt(string text)
-  {
-    string out;
-
-    // Modifying all characters other than uppercase : lowercase -> uppercase, other -> delete
-    for(unsigned int i = 0; i < text.length(); ++i)
     {
-      if(text[i] >= 'A' && text[i] <= 'Z')
-        out += text[i];
-      else if(text[i] >= 'a' && text[i] <= 'z')
-        out += text[i] + 'A' - 'a';
-    }
+      string out;
+      int indexKey = 0;
 
-    // ADD THE VIGENERE CRYPTION 	
- 
-    return out;
-  }
+      // Modifying all characters other than uppercase : lowercase -> uppercase, other -> delete
+      for(unsigned int i = 0; i < text.length(); ++i)
+      {
+        if(text[i] >= 'A' && text[i] <= 'Z'){
+          out += ((text[i] - 'A' + key[indexKey] - 'A') % 26) + 'A';
+          indexKey = (indexKey + 1) % key.length();
+        }
+        else if(text[i] >= 'a' && text[i] <= 'z')
+        {
+          out += ((text[i] - 'a' + key[indexKey] - 'A') % 26) + 'A';
+          indexKey = (indexKey + 1) % key.length();
+        }
+      }
+
+      return out;
+    }
  
   string decrypt(string text)
   {
