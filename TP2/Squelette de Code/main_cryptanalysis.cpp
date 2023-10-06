@@ -8,6 +8,183 @@
 using namespace std;
  
 typedef array<pair<char, double>, 26> FreqArray;
+
+int maxKeySize = 20;
+int alphabet_number = 26;
+
+map<int, string> getSubSequences(string cipher, int seq_number)
+{
+  map<int, string> sequences;
+  int size = cipher.length(), j=0;
+  for (int i=0; i<size; i++)
+  {
+    sequences[j%seq_number] += cipher[i];
+    j++;
+  }
+  return sequences;
+}
+
+double calculateThePeriod(string text)  
+{
+  double indice = 0;
+  int n = text.length(), ni=0;
+  for (char i='A'; i<='Z'; i++)
+  {
+    if (text.find(i) != std::string::npos) 
+    {       
+      ni = count(text.begin(), text.end(), i);
+      indice += (ni*(ni-1))/static_cast<double>(n*(n-1));
+    }
+  }
+  return indice;
+}
+
+std::string toUpperCase(const std::string& str) {
+    std::string result = str;
+    for (char& c : result) {
+        c = std::toupper(c);
+    }
+    return result;
+}
+
+map<int, double> findPeriodForSingleSequence(map<int, string> sequences)
+{
+  map<int, double> result;
+  for (int i; i<sequences.size(); i++)
+  {
+    result[i] = calculateThePeriod(sequences[i]);
+  }
+  return result;
+}
+
+double averageIC(map<int, double> ics)
+{
+  double average = 0;
+  for (int i=0; i<ics.size(); i++)
+  {
+    average += ics[i];
+  }
+  average /= (ics.size()-1);
+  return average;
+}
+
+// The final key may be one of the highest average values 
+// SO here we will the 5 highest values
+
+vector<pair<int, pair<double, map<int, string>>>> getKeySizes(string cipher, int possibleKeys) 
+{
+  map<int, pair<double, map<int, string>>> result;
+
+  for (int keySize = 2; keySize < maxKeySize; keySize++)
+  {
+    // Here we divide the sequence (cipher) in keySize-1 subSequences
+    map<int, string> sequences = getSubSequences(cipher, keySize);
+    // Here we collect the IC value for each single sequence 
+    map<int, double> periods = findPeriodForSingleSequence(sequences);
+    // And then here we collect the average value of the sequence (cipher)
+    double average = averageIC(periods);
+    // We associate each keySize to its average IC value for the cipher
+    result[keySize] = pair<double, map<int, string>>(average, sequences);
+  }
+
+  // Create a vector to store pairs of keys and values
+  vector<pair<int, pair<double, map<int, string>>>> pairs(result.begin(), result.end());
+
+  // Sort the vector in descending order based on values
+  sort(pairs.begin(), pairs.end(), [](const auto &a, const auto &b) {
+      return a.second.first > b.second.first;
+  });
+
+  // Collect the 5 highest values
+  int count = 0;
+  vector<pair<int, pair<double, map<int, string>>>> top5Pairs;
+  for (const auto &pair : pairs) {
+      if (count >= 5) {
+          break;
+      }
+      top5Pairs.push_back(pair);
+      count++;
+  }
+
+  return top5Pairs;
+}
+
+// Then we should seek the key value
+
+double chi_square(string cipher, array<double, 26> Eqs) 
+{
+  double chiSquare = 0;
+
+  for (char i = 'A'; i < '['; i++) {
+    // Find the corresponding English letter frequency
+    double Eq = Eqs[i - 'A'];
+    // Calculate the observed frequency (Cq) in the cipher
+    int Cq = std::count(cipher.begin(), cipher.end(), i);
+    // Calculate the chi-square value for this letter
+    chiSquare += ((Cq - Eq) * (Cq - Eq)) / Eq;
+  }
+
+  return chiSquare;
+}
+
+string caesarEncrypt(string cipher, int step)
+{
+  string output;
+  unsigned int size = cipher.length(); 
+  for (unsigned int i=0; i<size; i++) 
+  {
+    output +=  static_cast<char>((cipher[i] - 'A' + step) % 26 + 'A');
+  }
+  return output;
+}
+
+// <keySize, pair<averageIc, map<keySize, subCipher>>> In input we take this
+
+void findTheKey(vector<pair<int, pair<double, map<int, string>>>> sequenceData, array<double, 26> Eqs)
+{
+  const int alphabet_number = 26; 
+
+  for (const auto& value : sequenceData)
+  {
+    int key = value.first;
+    map<int, string> password;
+    double average = value.second.first;
+
+    for (const auto& result : value.second.second)
+    {
+      map<int, double> key_chisquare;
+
+      for (int i = 0; i < alphabet_number; i++)
+      {
+        string ceasar = caesarEncrypt(result.second, i);
+        double chiSquare = chi_square(ceasar, Eqs);
+        key_chisquare[i] = chiSquare;
+      }
+
+      // Sort the chi-square values to find the lowest ones
+      vector<pair<int, double>> sorted_chisquare(key_chisquare.begin(), key_chisquare.end());
+      sort(sorted_chisquare.begin(), sorted_chisquare.end(), [](const auto &a, const auto &b) {
+        return a.second < b.second;
+      });
+
+      int i = 0;
+
+      for (const auto& [cle, valeur] : sorted_chisquare)
+      {
+        password[i] += static_cast<char>('A' + cle);
+        if (i >= 2) break; // Collect the 3 lowest chi-square keys
+        i++;
+      }
+    }
+
+    cout << "The possible password for keylength " << key << " with average " << average << ":\n";
+
+    for (int i = 0; i < 3; i++) // Print the top 3 passwords
+    {
+      cout << "Password " << i + 1 << ": " << password[i] << endl;
+    }
+  }
+}
  
 class VigenereCryptanalysis
 {
@@ -51,17 +228,49 @@ int main()
     0.0229,  0.0768,  0.0520,  0.0292,  0.0083,  0.0643,
     0.0887,  0.0744,  0.0523,  0.0128,  0.0006,  0.0053,
     0.0026,  0.0012};	
- 
-  VigenereCryptanalysis vc_en(english);
-  pair<string, string> output_en = vc_en.analyze(input);
- 
-  cout << "Key: "  << output_en.second << endl;
-  cout << "Text: " << output_en.first << endl;
 
-  VigenereCryptanalysis vc_fr(french);
-  pair<string, string> output_fr = vc_fr.analyze(input);
+  string cipher = """iefomntuohenwfwsjbsfftpgsnmhzsbbizaomosiuxycqaelrwsklqzekjvwsivijmhuvasmvwjewlzgubzlavclhgmuhwhakookakkgmrelgeefvwjelksedtyhsgghbamiyweeljcemxsohlnzujagkshakawwdxzcmvkhuwswlqwtmlshojbsguelgsumlijsmlbsixuhsdbysdaolfatxzofstszwryhwjenuhgukwzmshbagigzzgnzhzsbtzhalelosmlasjdttqzeswwwrklfguzl""";
+  string cipher_U = toUpperCase(cipher);
+  int possibleKeys = 15;
+  vector<pair<int, pair<double, map<int, string>>>> data = getKeySizes(cipher_U, possibleKeys);
+
+  findTheKey(data, french);
+
+  // for (const auto& lines : data) {
+  //     std::cout << "First: " << lines.first << std::endl;
+  //     const auto& nestedPair = lines.second;
+
+  //     std::cout << "Second (double): " << nestedPair.first << std::endl;
+
+  //     const auto& innerMap = nestedPair.second;
+
+  //     for (const auto& entry : innerMap) {
+  //         std::cout << "Key: " << entry.first << ", Value: " << entry.second << std::endl;
+  //     }
+  // }
+  // map<int, string> sequences = getSubSequences(cipher_U, 15);
+  // for (const auto& data : sequences) {
+  //   cout << data.first << " : " << data.second << endl;
+  // }
+  // map<int, double> periods = findPeriodForSingleSequence(sequences);
+
+  // for (const auto& data : periods) {
+  //   cout << data.first << " : " << data.second << endl;
+  // }
+  // double average = averageIC(periods);
+  
+  // cout << average << endl;
+
+  // VigenereCryptanalysis vc_en(english);
+  // pair<string, string> output_en = vc_en.analyze(input);
  
-  cout << "Key: "  << output_fr.second << endl;
-  cout << "Text: " << output_fr.first << endl;
+  // cout << "Key: "  << output_en.second << endl;
+  // cout << "Text: " << output_en.first << endl;
+
+  // VigenereCryptanalysis vc_fr(french);
+  // pair<string, string> output_fr = vc_fr.analyze(input);
+ 
+  // cout << "Key: "  << output_fr.second << endl;
+  // cout << "Text: " << output_fr.first << endl;
 
 }
