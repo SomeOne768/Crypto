@@ -43,6 +43,7 @@ public:
  
   string decrypt(string text)
   {
+    // Text is all uppercase
     string out;
 
     // To find the original letter we must:
@@ -52,28 +53,24 @@ public:
     
     // Mathematically
     // Labels:
-    // i: line
-    // j: column
+    // k: key
     // c: cipher
     // d: decipher
-    // Calcul for each caractere: d = j + (c - j) [26]
+    // Calcul for each caractere: d = (c - k) [26] and if d<0 then take 'Z' + d
 
     int indice_key = 0;
-    for(char letter : text)
+    for(char cypher_letter : text)
     {
-      // converting into base 26:
-      // key and cypher letter
-      int j = key[indice_key] - 'A',
-          c = letter - 'A';
+      // decypher letter and converting into base 26
+      int d = (cypher_letter - key[indice_key]) % 26;
+      // checking if d < 0
+      d = d<0? d+26:d;    
 
-      // decypher letter
-      int d = (j + c - j) % 26;
+      // Reconvert into ASCII base
+      char decipher_letter = d + 'A';
 
-      // Convert into ASCII base
-      char letter_decipher = d + 'A';
-
-      // Adding letter the de decipher text
-      out += letter_decipher;
+      // Adding letter to the de decipher text
+      out += decipher_letter;
 
       // Taking the next letter of the key
       indice_key++;
@@ -90,14 +87,13 @@ public:
 
 int main()
 {
-  Vigenere cipher("MYKEY");
+  Vigenere cipher("ALGORITHM");
  
-  string original_en  = "Kerckhoffs's principle - A cryptosystem should be secure even if everything about the system, except the key, is public knowledge.";
+  string original_en  = "PYTHAGORE";
   string encrypted_en = cipher.encrypt(original_en);
   string decrypted_en = cipher.decrypt(encrypted_en);
- 
   cout << original_en << endl;
-  // cout << "Encrypted: " << encrypted_en << endl;
+  cout << "Encrypted: " << encrypted_en << endl;
   cout << "Decrypted: " << decrypted_en << endl;
 
   // string original_fr  = "Principe de Kerckhoffs - Toute la securite d'un systeme cryptographique doit reposer sur la clef et pas sur le systeme lui meme.";
