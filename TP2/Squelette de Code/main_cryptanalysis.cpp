@@ -83,12 +83,7 @@ public:
 
 };
 
-double Approx(double v, int n)
-{
-  v = v * pow(10, n);
 
-  return round(v) / pow(10, n);
-}
 
 std::string toUpperCase(const std::string& str) {
     std::string result = str;
