@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-#include <cmath>
 
 using namespace std;
 
@@ -61,14 +61,14 @@ public:
         count++;
     }
 
-    return (double) count / text.size();
+    return (double)count / text.size();
   }
 
   double static calculateThePeriod(string text) {
 
     // We take the frequencies for each letter
     double frequencies[NUMBER_OF_LETTER];
-    for (auto letter = 'A'; letter<= 'Z' ; letter++) {
+    for (auto letter = 'A'; letter <= 'Z'; letter++) {
       frequencies[letter - 'A'] = getFrequencies(text, letter);
     }
 
@@ -81,18 +81,48 @@ public:
     return IC;
   }
 
+  double chisquared(string text, array<double, 26> statistics) {
+    // E : expected number
+    // C : current number
+
+    // Constructing
+    // array<double, 26> C;
+
+    // Constructing :
+    // C: current number of each char
+    // E: expected value for each char
+
+    array<int, 26> C;
+    array<double, 26> E;
+    for (int i = 0; i < 26; i++) {
+      C[i] = count(text.begin(), text.end(), 'A' + i);
+      E[i] = statistics[i] * text.size();
+    }
+
+    // Calculing X²
+    double chi2 = 0;
+    for (int letter = 0; letter < 26; letter++) {
+      double Cq = C[letter], Eq = E[letter];
+      chi2 += (Cq - Eq) * (Cq - Eq) / Eq;
+    }
+
+    return chi2;
+  }
 };
 
+/***************** Fonction à faire ***************/
+// Trier et récupérer les n best values (en indiquant la taille de la clé)
 
+// FINDING THE KEY : we "know" the key
+// Compare subsequences distribution to french letter distribution
 
-std::string toUpperCase(const std::string& str) {
-    std::string result = str;
-    for (char& c : result) {
-        c = std::toupper(c);
-    }
-    return result;
+std::string toUpperCase(const std::string &str) {
+  std::string result = str;
+  for (char &c : result) {
+    c = std::toupper(c);
+  }
+  return result;
 }
-
 
 int main() {
   string input = "YOU HAVE TO COPY THE CIPHERTEXT FROM THE ATTACHED FILES OR "
@@ -122,14 +152,16 @@ int main() {
 
   // Calculer la periode pour chaque sequences + moyenne
   string cypher_exo2 =
-      "vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt";
-  
+      "vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmum"
+      "shwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluy"
+      "sdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt";
+
   cypher_exo2 = toUpperCase(cypher_exo2);
-  
 
   std::cout << "\nTest Period calcul\n";
   res = VigenereCryptanalysis::getSubSequences(cypher_exo2, 2);
-  double mean_IC_2 = VigenereCryptanalysis::calculateThePeriod(res[1]) * VigenereCryptanalysis::calculateThePeriod(res[0]) / 2.0;
+  double mean_IC_2 = VigenereCryptanalysis::calculateThePeriod(res[1]) *
+                     VigenereCryptanalysis::calculateThePeriod(res[0]) / 2.0;
   std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "\n";
   std::cout << VigenereCryptanalysis::calculateThePeriod(res[1]) << "\n";
   std::cout << mean_IC_2 << "\n";
