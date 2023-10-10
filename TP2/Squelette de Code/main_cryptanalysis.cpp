@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -53,48 +55,49 @@ public:
   double static getFrequencies(string text, char c) {
     // Return the frequence of a letter
     // Ex: 'aieie" f(a) = 1/5: f(i)=f(e)=2/5
-    int count = 0;
+    double count = 0;
     for (auto letter : text) {
       if (letter == c)
         count++;
     }
 
-    return count / text.size();
+    return (double) count / text.size();
   }
 
-  // @Jalil
   double static calculateThePeriod(string text) {
-    
+
     // We take the frequencies for each letter
     double frequencies[NUMBER_OF_LETTER];
-    for (int i = 0; i < NUMBER_OF_LETTER; i++)
-    {
-      frequencies[i] = getFrequencies(text, 'A'+i);
+    for (auto letter = 'A'; letter<= 'Z' ; letter++) {
+      frequencies[letter - 'A'] = getFrequencies(text, letter);
     }
 
     // Calculate de IC
     double IC = 0;
-    for(double f : frequencies)
-    {
-      IC += f *(f-1) / (NUMBER_OF_LETTER * (NUMBER_OF_LETTER - 1) );
+    for (double f : frequencies) {
+      IC += f * (f - 1) / (text.size() * (text.size() - 1));
     }
 
     return IC;
   }
 
-  // @Souleymane
-  // double static calculateThePeriod(string text) {
-  //   double indice = 0;
-  //   int n = text.length(), ni = 0;
-  //   for (char i = 'A'; i <= 'Z'; i++) {
-  //     if (text.find(i) != std::string::npos) {
-  //       ni = count(text.begin(), text.end(), i);
-  //       indice += (ni * (ni - 1)) / static_cast<double>(n * (n - 1));
-  //     }
-  //   }
-  //   return indice;
-  // }
 };
+
+double Approx(double v, int n)
+{
+  v = v * pow(10, n);
+
+  return round(v) / pow(10, n);
+}
+
+std::string toUpperCase(const std::string& str) {
+    std::string result = str;
+    for (char& c : result) {
+        c = std::toupper(c);
+    }
+    return result;
+}
+
 
 int main() {
   string input = "YOU HAVE TO COPY THE CIPHERTEXT FROM THE ATTACHED FILES OR "
@@ -122,25 +125,29 @@ int main() {
   std::cout << res[1] << "==2222 ? \n"
             << (res[1] == "2222" ? "Passed" : "Failed") << "\n";
 
-
   // Calculer la periode pour chaque sequences + moyenne
-  std::cout << "Test Period calcul\n";
-  std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "==0 ? \n"
-            << (VigenereCryptanalysis::calculateThePeriod(res[0]) == 0 ? "Passed" : "Failed") << "\n";
-  std::cout <<  VigenereCryptanalysis::calculateThePeriod(res[1]) << "==0 ? \n"
-            << (VigenereCryptanalysis::calculateThePeriod(res[1]) == 0 ? "Passed" : "Failed") << "\n";
-            std::cout <<  VigenereCryptanalysis::calculateThePeriod(res[1]) << "==0 ? \n"
-            << (VigenereCryptanalysis::calculateThePeriod(res[1]) == 0 ? "Passed" : "Failed") << "\n";
+  string cypher_exo2 =
+      "vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt";
+  
+  cypher_exo2 = toUpperCase(cypher_exo2);
+  
 
-  VigenereCryptanalysis vc_en(english);
-  pair<string, string> output_en = vc_en.analyze(input);
+  std::cout << "\nTest Period calcul\n";
+  res = VigenereCryptanalysis::getSubSequences(cypher_exo2, 2);
+  double mean_IC_2 = VigenereCryptanalysis::calculateThePeriod(res[1]) * VigenereCryptanalysis::calculateThePeriod(res[0]) / 2.0;
+  std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "\n";
+  std::cout << VigenereCryptanalysis::calculateThePeriod(res[1]) << "\n";
+  std::cout << mean_IC_2 << "\n";
 
-  cout << "Key: " << output_en.second << endl;
-  cout << "Text: " << output_en.first << endl;
+  // VigenereCryptanalysis vc_en(english);
+  // pair<string, string> output_en = vc_en.analyze(input);
 
-  VigenereCryptanalysis vc_fr(french);
-  pair<string, string> output_fr = vc_fr.analyze(input);
+  // cout << "Key: " << output_en.second << endl;
+  // cout << "Text: " << output_en.first << endl;
 
-  cout << "Key: " << output_fr.second << endl;
-  cout << "Text: " << output_fr.first << endl;
+  // VigenereCryptanalysis vc_fr(french);
+  // pair<string, string> output_fr = vc_fr.analyze(input);
+
+  // cout << "Key: " << output_fr.second << endl;
+  // cout << "Text: " << output_fr.first << endl;
 }
