@@ -81,6 +81,27 @@ public:
     return IC;
   }
 
+  static std::vector<std::pair<int, double>> top3ICs(std::map<int, double> averageICValues) {
+    // Convert the map to a vector of pairs (result vector)
+    std::vector<std::pair<int, double>> resultVec(averageICValues.begin(), averageICValues.end());
+
+    // Sort the vector in descending order based on values
+    std::sort(resultVec.begin(), resultVec.end(), [](const auto &a, const auto &b) {
+        return a.second > b.second;
+    });
+
+    int i = 0;
+    std::vector<std::pair<int, double>> result;
+
+    // Collect the top 3 elements 
+    for (const auto& element : resultVec) {
+      if (i++ > 2) break;
+      result.push_back({element.first, element.second});
+    }
+
+    return result;
+  }
+
 };
 
 double Approx(double v, int n)
@@ -138,6 +159,16 @@ int main() {
   std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "\n";
   std::cout << VigenereCryptanalysis::calculateThePeriod(res[1]) << "\n";
   std::cout << mean_IC_2 << "\n";
+
+
+  // Test for the sort algorithm
+  map<int, double> elt{{1, 2.2}, {2, 2.3}, {3, 2.5}, {5, 1.1}};
+
+  auto data = VigenereCryptanalysis::top3ICs(elt);
+
+  for (const auto& element : data) {
+    std::cout << element.first << " : " << element.second << std::endl;
+  }
 
   // VigenereCryptanalysis vc_en(english);
   // pair<string, string> output_en = vc_en.analyze(input);
