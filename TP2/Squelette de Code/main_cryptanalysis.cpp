@@ -7,188 +7,111 @@
 #include <vector>
 #include <cmath>
 
+#include "vigenere.hpp"
+#include "vigenereCryptanalysis.hpp"
+
 using namespace std;
 
 typedef array<pair<char, double>, 26> FreqArray;
-const int NUMBER_OF_LETTER = 26;
-
-class VigenereCryptanalysis {
-  private:
-    array<double, 26> targets;
-    array<double, 26> sortedTargets;
-
-    // TO COMPLETE
-
-  public:
-    VigenereCryptanalysis(const array<double, 26> &targetFreqs) {
-      targets = targetFreqs;
-      sortedTargets = targets;
-      sort(sortedTargets.begin(), sortedTargets.end());
-    }
-
-    pair<string, string> analyze(string input) {
-      string key = "ISIMA PERHAPS";
-      string result = "I CAN NOT DECRYPT THIS TEXT FOR NOW :-)" + input;
-
-      return make_pair(result, key);
-    }
-
-    vector<string> static getSubSequences(string cipher, int keySize) {
-      // Building subsequences for each letter of the key
-      // To iterate we need to categorify each cypher's letter such as
-      // cypher_letter_number % keySize Letter 1 will have all the 0 Letter 2 will
-      // have all the 1
-      // ..
-
-      // Vector of subsquences
-      vector<string> subSequences (keySize);
-
-      for (long unsigned int i = 0; i < cipher.size(); i++) {
-        subSequences[i % keySize] += cipher[i];
-      }
-
-      return subSequences;
-    }
-
-    double static getFrequencies(string text, char c) {
-      // Return the frequence of a letter
-      // Ex: 'aieie" f(a) = 1/5: f(i)=f(e)=2/5
-      double count = 0;
-      for (auto letter : text) {
-        if (letter == c)
-          count++;
-      }
-
-      return (double) count / text.size();
-    }
-
-    double static calculateThePeriod(string text) {
-
-      // We take the frequencies for each letter
-      double frequencies[NUMBER_OF_LETTER];
-      for (auto letter = 'A'; letter<= 'Z' ; letter++) {
-        frequencies[letter - 'A'] = getFrequencies(text, letter);
-      }
-
-      // Calculate de IC
-      double IC = 0;
-      for (double f : frequencies) {
-        IC += f * (f - 1) / (text.size() * (text.size() - 1));
-      }
-
-      return IC;
-    }
-
-    map<double, string> static getEachPeriod(vector<string> & subSequences){
-
-        map <double, string> subSequencesValues;
-
-        for (string subSequence : subSequences)
-        { 
-          subSequencesValues.insert({calculateThePeriod(subSequence), subSequence});
-        }
-
-        return subSequencesValues;
-    }
-
-
-    double static averageOfPeriods(const map<double, string> & subSequencesPeriods)
-    {
-      double average = 0.0; 
-
-      for (auto const& pair : subSequencesPeriods)
-      {
-          // We add to the average each IC value of the subsequences
-          average += (pair.first); 
-      }
-
-      // We divide the sum of IC values by the number of subsequences
-      average /= (double) subSequencesPeriods.size();
-      return average;
-    }
-
-
-
-    // vector<double> static getAverages(string cipher, int maxKeySize)
-    // {
-    //     vector<double> allAverages;
-
-    //     for (int i = 0; i < maxKeySize; i++)
-    //     {
-    //         allAverages.push_back()
-    //     }
-
-    // }
-
-
-
-};
 
 double Approx(double v, int n)
 {
-  v = v * pow(10, n);
+	v = v * pow(10, n);
 
-  return round(v) / pow(10, n);
+	return round(v) / pow(10, n);
 }
 
-std::string toUpperCase(const std::string& str) {
-    std::string result = str;
-    for (char& c : result) {
-        c = std::toupper(c);
-    }
-    return result;
+std::string toUpperCase(const std::string &str)
+{
+	std::string result = str;
+	for (char &c : result)
+	{
+		c = std::toupper(c);
+	}
+	return result;
 }
 
+int main()
+{
 
-int main() {
-  string input = "YOU HAVE TO COPY THE CIPHERTEXT FROM THE ATTACHED FILES OR "
-                 "FROM YOUR CIPHER ALGORITHM";
 
-  // array<double, 26> english = {
-  //     0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,
-  //     0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749,
-  //     0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,
-  //     0.00978, 0.02360, 0.00150, 0.01974, 0.00074};
+	// int maxKeySize = 15;
 
-  // array<double, 26> french = {
-  //     0.0811, 0.0081, 0.0338, 0.0428, 0.1769, 0.0113, 0.0119, 0.0074, 0.0724,
-  //     0.0018, 0.0002, 0.0599, 0.0229, 0.0768, 0.0520, 0.0292, 0.0083, 0.0643,
-  //     0.0887, 0.0744, 0.0523, 0.0128, 0.0006, 0.0053, 0.0026, 0.0012};
+	string input = "YOU HAVE TO COPY THE CIPHERTEXT FROM THE ATTACHED FILES OR "
+					"FROM YOUR CIPHER ALGORITHM";
 
-  // TEST
-  string test_cypher = "12121212", test_key = "HM";
-  auto res = VigenereCryptanalysis::getSubSequences(test_cypher, 2);
+	// array<double, 26> english = {
+	//     0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,
+	//     0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749,
+	//     0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,
+	//     0.00978, 0.02360, 0.00150, 0.01974, 0.00074};
 
-  // Recupérer les séquences en fonction de la taille de la clé
-  std::cout << "Test subsequences\n";
-  std::cout << res[0] << "==1111 ? \n"
-            << (res[0] == "1111" ? "Passed" : "Failed") << "\n";
-  std::cout << res[1] << "==2222 ? \n"
-            << (res[1] == "2222" ? "Passed" : "Failed") << "\n";
+	// array<double, 26> french = {
+	//     0.0811, 0.0081, 0.0338, 0.0428, 0.1769, 0.0113, 0.0119, 0.0074, 0.0724,
+	//     0.0018, 0.0002, 0.0599, 0.0229, 0.0768, 0.0520, 0.0292, 0.0083, 0.0643,
+	//     0.0887, 0.0744, 0.0523, 0.0128, 0.0006, 0.0053, 0.0026, 0.0012};
 
-  // Calculer la periode pour chaque sequences + moyenne
-  string cypher_exo2 =
-      "vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt";
-  
-  cypher_exo2 = toUpperCase(cypher_exo2);
-  
 
-  std::cout << "\nTest Period calcul\n";
-  res = VigenereCryptanalysis::getSubSequences(cypher_exo2, 2);
-  double mean_IC_2 = VigenereCryptanalysis::calculateThePeriod(res[1]) * VigenereCryptanalysis::calculateThePeriod(res[0]) / 2.0;
-  std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "\n";
-  std::cout << VigenereCryptanalysis::calculateThePeriod(res[1]) << "\n";
-  std::cout << mean_IC_2 << "\n";
+	// vector<double> english = {
+	// 	8.55, 1.60, 3.16, 3.87, 12.10, 2.18, 2.09, 4.96, 7.33, 0.22, 0.81, 4.21, 2.53, 
+	// 	7.17, 7.47, 2.07, 0.10, 6.33, 6.73, 8.94, 2.68, 1.06, 1.83, 0.19, 1.72, 0.11};
 
-  // VigenereCryptanalysis vc_en(english);
-  // pair<string, string> output_en = vc_en.analyze(input);
+	// map<char, double> english = {
+	// 	{'A', 8.55}, {'B', 1.60}, {'C', 3.16}, {'D', 3.87}, {'E', 12.10}, 
+	// 	{'F', 2.18}, {'G', 2.09}, {'H', 4.96}, {'I', 7.33}, {'J', 0.22},
+	// 	{'K', 0.81}, {'L', 4.21}, {'M', 2.53}, {'N', 7.17}, {'O', 7.47},
+	// 	{'P', 2.07}, {'Q', 0.10}, {'R', 6.33}, {'S', 6.73}, {'T', 8.94},
+	// 	{'U', 2.68}, {'V', 1.06}, {'W', 1.83}, {'X', 0.19}, {'Y', 1.72}, {'Z', 0.11}
+	// };
 
-  // cout << "Key: " << output_en.second << endl;
-  // cout << "Text: " << output_en.first << endl;
 
-  // VigenereCryptanalysis vc_fr(french);
-  // pair<string, string> output_fr = vc_fr.analyze(input);
+	// TEST
+	// string test_cypher = "12121212", test_key = "HM";
+	// auto res = VigenereCryptanalysis::getSubSequences(test_cypher, 2);
 
-  // cout << "Key: " << output_fr.second << endl;
-  // cout << "Text: " << output_fr.first << endl;
+	// // Recupérer les séquences en fonction de la taille de la clé
+	// std::cout << "Test subsequences\n";
+	// std::cout << res[0] << "==1111 ? \n"
+	// 			<< (res[0] == "1111" ? "Passed" : "Failed") << "\n";
+	// std::cout << res[1] << "==2222 ? \n"
+	// 			<< (res[1] == "2222" ? "Passed" : "Failed") << "\n";
+
+	// // Calculer la periode pour chaque sequences + moyenne
+	string cypher_exo2 =
+	 	"vptnvffuntshtarptymjwzirappljmhhqvsubwlzzygvtyitarptyiougxiuydtgzhhvvmumshwkzgstfmekvmpkswdgbilvjljmglmjfqwioiivknulvvfemioiemojtywdsajtwmtcgluysdsumfbieugmvalvxkjduetukatymvkqzhvqvgvptytjwwldyeevquhlulwpkt";
+
+	string cypher_encoded = toUpperCase(cypher_exo2);
+	string language = "eng";
+
+	int keySize = 16;
+
+	VigenereCryptanalysis analysis(cypher_encoded, language, keySize);
+
+	std::cout << "Cle " << analysis.getKeyFound() << std::endl;
+	std::cout << "Decode" << analysis.getDecodedCipher() << std::endl;
+
+	// std::cout << "\nTest Period calcul\n";
+	// res = VigenereCryptanalysis::getSubSequences(cypher_exo2, 2);
+	// double mean_IC_2 = VigenereCryptanalysis::calculateThePeriod(res[1]) * VigenereCryptanalysis::calculateThePeriod(res[0]) / 2.0;
+	// std::cout << VigenereCryptanalysis::calculateThePeriod(res[0]) << "\n";
+	// std::cout << VigenereCryptanalysis::calculateThePeriod(res[1]) << "\n";
+	// std::cout << mean_IC_2 << "\n";
+
+	// vector<double> averages = VigenereCryptanalysis::getAverages(cypher_exo2, maxKeySize);
+
+	// for (long unsigned int i = 0; i < averages.size(); i++) {
+	// 	std::cout << "Value of keySize = " << i << " = " << averages.at(i) << std::endl;
+	// }
+
+	// VigenereCryptanalysis vc_en(english);
+	// pair<string, string> output_en = vc_en.analyze(input);
+
+	// cout << "Key: " << output_en.second << endl;
+	// cout << "Text: " << output_en.first << endl;
+
+	// VigenereCryptanalysis vc_fr(french);
+	// pair<string, string> output_fr = vc_fr.analyze(input);
+
+	// cout << "Key: " << output_fr.second << endl;
+	// cout << "Text: " << output_fr.first << endl;
 }
