@@ -8,44 +8,44 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string
 : maxKeySize(maximumKeySize), language(languageInit), encodedCipher(cipher) 
 {
 
-    int bestKeySize 	= 1;
-    double closestValue = 0.0;
-    double languageValue= languages.at(language).second;
+    std::vector<std::pair<int, double>> bestKeySizes(NUMBER_OF_KEYSIZES, {-1, 0.0});
+    //double languageValue= languages.at(language).second;
 
     // We calculate all the substrings and their values for each keySize from 1 to the maximum size passed in argument
-    for (int i = 1; i <= maxKeySize; i++){
+    for (int i = 0; i < maxKeySize; i++){
 
-        analysisKeys.push_back(AnalysisKeySize(i, cipher));
+        analysisKeys.push_back(AnalysisKeySize(i+1, cipher));
 
-        // We choose to keep the keySize with the substrings that have the closest average IC value to 
-        // the language average IC
+        for (int j = 0; j < NUMBER_OF_KEYSIZES; j++)
+        {   
 
-        /*
-        if (abs((analysisKeys[i-1].averageIc) - languageValue) < abs(closestValue - languageValue))
-        {
-            closestValue = analysisKeys[i-1].averageIc;
-            bestKeySize = i;
-        }
-        */
-        
+            // The more the chiSquared value is close to zero the closest it is to its original language statistically
+            if ((bestKeySizes[j].first == -1) || (analysisKeys[i].averageIc > bestKeySizes[j].second))
+            {
+                for (int k = NUMBER_OF_KEYSIZES -1; k > j; k--)
+                {
+                    bestKeySizes[k] = bestKeySizes[k-1] ;
+                }
 
-        // We choose to keep the biggest value of IC of the substrings generated for a given keySize
-        if ((analysisKeys[i-1].averageIc) > closestValue){
-            closestValue = analysisKeys[i-1].averageIc;
-            bestKeySize = i;
+                bestKeySizes[j] = {i+1, analysisKeys[i].averageIc};
+                break;
+            }
         }
     }
 
-    // After we have the keySize with the best statistical values for this language we calculate the original key
-    keyFound = analysisKeys[bestKeySize-1].getKey(language);
-    // Then we decrypt the text with the key we found to get back to the original text before encryption
-    decodedCipher = Vigenere(keyFound).decrypt(cipher);
+    for (int j = 0; j < NUMBER_OF_KEYSIZES; j++)
+    {   
+        if (bestKeySizes[j].first != -1)
+        {
+            analysisKeys[bestKeySizes[j].first - 1].getKeys(languageInit);
+            for (std::pair<double, std::pair<std::string, std::string>> keyAndDecoded : analysisKeys[bestKeySizes[j].first - 1].keysAndDecoded)
+            {
+                std::cout << "\n Key : " << keyAndDecoded.second.first << "\n Decoded :   " <<  keyAndDecoded.second.second << std::endl;
+            }
+        }
+    }
 }
 
-const string VigenereCryptanalysis::getKeyFound() const 
-{
-    return keyFound;
-}
 
 const string VigenereCryptanalysis::getLanguage() const 
 {
@@ -57,10 +57,6 @@ const string VigenereCryptanalysis::getEncodedCipher() const
     return encodedCipher;
 }
 
-const string VigenereCryptanalysis::getDecodedCipher() const 
-{
-    return decodedCipher;
-}
 
 
 

@@ -3,7 +3,9 @@
 
 
 // Construct an object representing a keySize and its substrings and values for a specific cipher
-AnalysisKeySize::AnalysisKeySize(const int kSize, const std::string & cipher):keySize(kSize),subSequences(kSize)
+AnalysisKeySize::AnalysisKeySize(const int kSize, const std::string & cipher)
+: encoded(cipher), keySize(kSize) , subSequences(kSize), keysAndDecoded(NUMBER_OF_KEYS, {0.0, {DEFAULT_STRING, DEFAULT_STRING}}),
+bestCharactersForKeys(kSize, std::vector<std::pair<char, double>>(NUMBER_OF_LETTER, {DEFAULT_LETTER, 0}))
 {
 
     // Generate the substrings of the text, the number of substrings generated is the size of the key
@@ -40,6 +42,7 @@ std::string AnalysisKeySize::decodeCaesar(const std::string & text, int caesarVa
     }
 
     return encoded;
+    
 }
 
 // Calculate the chiSquared value of a given string in a specific language
@@ -64,13 +67,12 @@ double AnalysisKeySize::chiSquaredResult(const std::string & text, const long un
 
 
 // Calculate the most probable key used to encrypt with the Vigenere algorithm the original text
-const std::string AnalysisKeySize::getKey(std::string language)
+void AnalysisKeySize::getKeys(std::string language)
 {   
 
-    double chiSquared;
-    double minChiSquared;
-    std::string key = "";
-    char minChiSquaredLetter;
+    std::cout << "ON ARRIVE LA " << std::endl;
+
+    double currentChiSquared;
     std::string caesarDecoded;
     long unsigned int subsequenceSize;
 
@@ -79,32 +81,34 @@ const std::string AnalysisKeySize::getKey(std::string language)
     {	
         subsequenceSize = subSequences[i-1].first.size();
 
-        // We set a default minimum value of the chi squared and letter used to encrypt this substring
-        minChiSquared = 10000.0;
-        minChiSquaredLetter = 'A';
-
         // We calculate each of the 26 letters that could be used to encrypt the substring
         for (int caesar = 0; caesar < 26; caesar++){
 
             // For this letter we decode the message with the reverse algorithm of caesar
             caesarDecoded = decodeCaesar(subSequences[i-1].first, caesar);
             // With this decoded string we can now get its chiSquared value
-            chiSquared = chiSquaredResult(caesarDecoded, subsequenceSize, language);
+            currentChiSquared = chiSquaredResult(caesarDecoded, subsequenceSize, language);
 
-            // The more the chiSquared value is close to zero the closest it is to its original language statistically
-            if (chiSquared < minChiSquared)
+            for (int j = 0; j < NUMBER_OF_LETTER; j++)
             {
-                minChiSquared 		= chiSquared;
-                minChiSquaredLetter	= 'A' + caesar;
+                // The more the chiSquared value is close to zero the closest it is to its original language statistically
+                if ((bestCharactersForKeys[i-1][j].first == DEFAULT_LETTER) || (currentChiSquared <= bestCharactersForKeys[i-1][j].second))
+                {
+                    for (int k = NUMBER_OF_LETTER -1; k > j; k--)
+                    {
+                        bestCharactersForKeys[i-1][k] = bestCharactersForKeys[i-1][k-1];
+                    }
+
+                    bestCharactersForKeys[i-1][j] = {(char) (caesar + 'A'), currentChiSquared};
+                    break;
+                }
             }
         }
-
-        // After all the calculation of this specific character of the key
-        // We add the one with the minimum chiSquared value of all the 26 letters
-        key += minChiSquaredLetter;
     }
 
-    return key;
+    std::cout << "ON ARRIVE LA " << std::endl;
+
+    calculateKeysAndDecodes();
 }
 
 // Returns the number of occurences of a character in a string
@@ -116,15 +120,108 @@ double AnalysisKeySize::getCount(std::string text, char c)
 }
 
 
+// Fonction récursive pour générer toutes les combinaisons possibles
+void generateCombinations(
+    const std::vector<std::vector<std::pair<char, double>>>& possibilities,
+    std::string currentCombination,
+    long unsigned int currentPosition,
+    std::vector<std::string>& allCombinations
+) {
+    if (currentPosition == possibilities.size()) {
+        // We reached the end of the string we have to add the new combination
+        allCombinations.push_back(currentCombination);
+        return;
+    }
+
+    for (const std::pair<char, double>& option : possibilities[currentPosition]) {
+        // Ajoutez le caractère de cette colonne à la chaîne actuelle
+        std::string newCombination = currentCombination + option.first;
+
+        // Appelez récursivement pour la colonne suivante
+        generateCombinations(possibilities, newCombination, currentPosition + 1, allCombinations);
+    }
+}
+
+
+std::string decryptVigenere(const std::string & text, const std::string & key)
+{
+    // Text is all uppercase
+    std::string out;
+
+    // To find the original letter we must:
+    // Graphically
+    // 1. Take a letter from the key
+    // 2. Find the letter of the cipher to get the (real)text
+
+    // Mathematically
+    // Labels:
+    // k: key
+    // c: cipher
+    // d: decipher
+    // Calcul for each caractere: d = (c - k) [26] and if d<0 then take 'Z' + d
+
+    int indice_key = 0;
+    for (char cypher_letter : text)
+    {
+        // decypher letter and converting into base 26
+        int d = (cypher_letter - key[indice_key]) % 26;
+        // checking if d < 0
+        d = d < 0 ? d + 26 : d;
+
+        // Reconvert into ASCII base
+        char decipher_letter = d + 'A';
+
+        // Adding letter to the de decipher text
+        out += decipher_letter;
+
+        // Taking the next letter of the key
+        indice_key++;
+        indice_key %= key.length();
+    }
+
+    return out;
+}
+
+void AnalysisKeySize::calculateKeysAndDecodes()
+{
+    double ic = 0.0;
+    std::string decoded = "";
+    std::vector<std::string> allCombinations;
+    generateCombinations(bestCharactersForKeys, "", 0, allCombinations);
+    
+    // Affichez toutes les combinaisons possibles
+    for (const std::string& possibleKey : allCombinations)
+    {
+
+        decoded = decryptVigenere(encoded, possibleKey);
+        ic      = calculateIC(decoded);
+
+        for (int i = 0; i < NUMBER_OF_KEYS; i++)
+        {
+            // The more the chiSquared value is close to zero the closest it is to its original language statistically
+            if ((keysAndDecoded[i].second.first == DEFAULT_STRING) || (ic <= keysAndDecoded[i].first))
+            {
+                for (int k = NUMBER_OF_KEYS -1; k > i; k--)
+                {
+                    keysAndDecoded[k] = keysAndDecoded[k-1] ;
+                }
+
+                keysAndDecoded[i] = {ic, {possibleKey, encoded}};
+                break;
+            }
+        }
+    }
+}
+
 // Calculate the IC value of a string 
 double AnalysisKeySize::calculateIC(std::string text)
 {
     double IC = 0.0;
-    double frequencies[NUMBER_OF_LETTER];
+    double frequencies[26];
 
     // We take the number of occurences for each letter of the alphabet and put it in an array
     for (auto letter = 'A'; letter <= 'Z'; letter++) frequencies[letter - 'A'] = getCount(text, letter);
-     
+    
     // Calculate the IC of the text
     for (double f : frequencies) IC += f * (f - 1) / (text.size() * (text.size() - 1));
 

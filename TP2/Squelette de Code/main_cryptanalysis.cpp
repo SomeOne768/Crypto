@@ -87,8 +87,6 @@ int main()
 
 	VigenereCryptanalysis analysis(cypher_encoded, language, keySize);
 
-	std::cout << "Cle " << analysis.getKeyFound() << std::endl;
-	std::cout << "Decode" << analysis.getDecodedCipher() << std::endl;
 
 	// std::cout << "\nTest Period calcul\n";
 	// res = VigenereCryptanalysis::getSubSequences(cypher_exo2, 2);
