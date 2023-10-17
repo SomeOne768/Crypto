@@ -7,3 +7,4 @@ vigenereCryptanalysis.o
 vigenere.o
 *.o
 test*
+tp2

@@ -27,7 +27,10 @@ bestCharactersForKeys(kSize, std::vector<std::pair<char, double>>(NB_BEST_CHARS,
     averageIc /= (double)kSize;
 }
 
-// Encode a string with the caesar algorithm
+/********************************************/
+/* Method to encode text using the Caesar   */
+/* cipher with a specified offset value.    */
+/********************************************/
 std::string AnalysisKeySize::encodeCaesar(const std::string &text, int caesarValue)
 {
 
@@ -38,7 +41,11 @@ std::string AnalysisKeySize::encodeCaesar(const std::string &text, int caesarVal
     return encoded;
 }
 
-// Decode a given string with the caesar algorithm
+/********************************************/
+/* Method to decode text encoded with the   */
+/* Caesar cipher using a specified offset   */
+/* value.                                   */
+/********************************************/
 std::string AnalysisKeySize::decodeCaesar(const std::string &text, int caesarValue)
 {
 
@@ -77,12 +84,15 @@ double AnalysisKeySize::chiSquaredResult(const std::string &text, const long uns
     return sum;
 }
 
-// Calculate the most probable key used to encrypt with the Vigenere algorithm the original text
+/********************************************/
+/* Calculate the most probable key used to  */
+/* encrypt the original text with the       */
+/* Vigenere algorithm                       */
+/********************************************/
 void AnalysisKeySize::getKeys(std::string language)
 {
 
     double currentChiSquared;
-
     std::string caesarDecoded;
     long unsigned int subsequenceSize;
 
@@ -116,25 +126,14 @@ void AnalysisKeySize::getKeys(std::string language)
             }
         }
     }
-    /*
-    if (keySize == 7)
-    {
-        for (int i = 0; i < keySize; i++){
-            std::cout << "Char " << i << " a pour valeurs : ";
-            for (int j = 0; j < NUMBER_OF_LETTER; j++)
-            {
-                std::cout << bestCharactersForKeys[i][j].first << " ";
-            }
-            std::cout << std::endl;
-
-        }
-
-    }*/
-
+    // After finding the best characters for each key position, calculate the keys and decodes
     calculateKeysAndDecodes();
 }
 
-// Returns the number of occurences of a character in a string
+/********************************************/
+/* Method to count the occurrences of a     */
+/* specific character in a given text.      */
+/********************************************/
 double AnalysisKeySize::getCount(std::string text, char c)
 {
     double count = 0;
@@ -144,7 +143,12 @@ double AnalysisKeySize::getCount(std::string text, char c)
     return count;
 }
 
-// Fonction récursive pour générer toutes les combinaisons possibles
+
+/********************************************/
+/* Recursive method to generate all        */
+/* possible combinations of characters     */
+/* from a set of possibilities.            */
+/********************************************/
 void generateCombinations(
     const std::vector<std::vector<std::pair<char, double>>> &possibilities,
     std::string currentCombination,
@@ -160,14 +164,19 @@ void generateCombinations(
 
     for (const std::pair<char, double> &option : possibilities[currentPosition])
     {
-        // Ajoutez le caractère de cette colonne à la chaîne actuelle
+        // Add the character from this column to the current string
         std::string newCombination = currentCombination + option.first;
 
-        // Appelez récursivement pour la colonne suivante
+        // Recursively call for the next column
         generateCombinations(possibilities, newCombination, currentPosition + 1, allCombinations);
     }
 }
 
+
+/********************************************/
+/* Method to decrypt a Vigenere cipher text */
+/* using the provided key.                  */
+/********************************************/
 std::string decryptVigenere(const std::string &text, const std::string &key)
 {
     // Text is all uppercase
@@ -200,32 +209,40 @@ std::string decryptVigenere(const std::string &text, const std::string &key)
         out += decipher_letter;
 
         // Taking the next letter of the key
-        indice_key++;
-        indice_key %= key.length();
+        (++indice_key) %= key.length();
     }
 
     return out;
 }
 
+
+/********************************************/
+/* Method to calculate possible keys and    */
+/* their corresponding decoded texts for a  */
+/* given Vigenere key size, based on the    */
+/* best characters for each key position.   */
+/********************************************/
 void AnalysisKeySize::calculateKeysAndDecodes()
 {
     double ic = 0.0;
     std::string decoded = "";
-    std::vector<std::string> allCombinations;
+    std::vector<std::string> allCombinations; // Vector to store all possible key combinations
     generateCombinations(bestCharactersForKeys, "", 0, allCombinations);
 
-    // Affichez toutes les combinaisons possibles
+    // Display all possible combinations
     for (const std::string &possibleKey : allCombinations)
     {
 
         decoded = decryptVigenere(encoded, possibleKey);
         ic = calculateIC(decoded);
 
+        // Compare the IC value with the current best IC values
         for (int i = 0; i < NB_BEST_KEYS_PER_KEYSIZE; i++)
         {
             // The more the chiSquared value is close to zero the closest it is to its original language statistically
             if ((keysAndDecoded[i].second.first == DEFAULT_STRING) || (ic <= keysAndDecoded[i].first))
             {
+                // moove existing best key-decode pairs to make space for the new one
                 for (int k = NB_BEST_KEYS_PER_KEYSIZE -1; k > i; k--)
                 {
                     keysAndDecoded[k] = keysAndDecoded[k - 1];
@@ -238,7 +255,10 @@ void AnalysisKeySize::calculateKeysAndDecodes()
     }
 }
 
-// Calculate the IC value of a string
+/********************************************/
+/* Method to calculate the Index of         */
+/* Coincidence (IC) for a given text.       */
+/********************************************/
 double AnalysisKeySize::calculateIC(std::string text)
 {
     double IC = 0.0;
