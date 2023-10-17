@@ -25,13 +25,6 @@ class VigenereCryptanalysis
                 const string getLanguage() const;
                 const string getEncodedCipher() const;
         
-
-        // static vector<std::string> getSubSequences(std::string &, int &);
-        // static double getFrequencies(string, char);
-        // static double calculateThePeriod(string);
-        // static map<double, string> getEachPeriod(vector<string> &);
-        // static double averageOfPeriods(const map<double, string> &);
-        
 };
 
 #endif

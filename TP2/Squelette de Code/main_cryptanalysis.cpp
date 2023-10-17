@@ -31,7 +31,6 @@ std::string toUpperCase(const std::string &str)
 
 int main()
 {
-
 	int keySizeMax = 16;
 	string language = "eng";
 

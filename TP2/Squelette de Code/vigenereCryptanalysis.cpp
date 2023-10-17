@@ -2,12 +2,17 @@
 #include <algorithm>
 #include <iostream>
 #include <cctype>
-
-// Constructor of a vigenereCryptanalysis object to decrypt an encoded string and find the key used to encode it 
-// with the vigenere algorithm
+sssssssssssssssssssssssssssssssssssssss
+/**************************************************************************/
+/* Constructor build an object that make the complete analysis            */
+/* It try to find the different possible keys and decipher the text       */
+/**************************************************************************/
 VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string & language,const int & maximumKeySize)
 : maxKeySize(maximumKeySize), encodedCipher(cipher) 
 {
+    // transform each letter to uppercase
+    for (long unsigned int i = 0; i < encodedCipher.size(); i++)
+        encodedCipher[i] = toupper(encodedCipher[i]);
 
     for (long unsigned int i = 0; i < encodedCipher.size(); i++) encodedCipher[i] = toupper(encodedCipher[i]);
 
@@ -16,7 +21,11 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string
     // We calculate all the substrings and their values for each keySize from 1 to the maximum size passed in argument
     for (int i = 0; i < maxKeySize; i++){
 
-        analysisKeys.push_back(AnalysisKeySize(i+1, cipher));
+    // Make analysis for the different keysize
+    for (int i = 0; i < maxKeySize; i++)
+    {
+        // Get the mean IC for the specifik keysize
+        analysisKeys.push_back(AnalysisKeySize(i + 1, cipher));
 
         for (int j = 0; j < NB_BEST_KEYSIZES; j++)
         {   
@@ -26,17 +35,20 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string
             {
                 for (int k = NB_BEST_KEYSIZES -1; k > j; k--)
                 {
-                    bestKeySizes[k] = bestKeySizes[k-1] ;
+                    bestKeySizes[k] = bestKeySizes[k - 1];
                 }
 
-                bestKeySizes[j] = {i+1, analysisKeys[i].averageIc};
+                bestKeySizes[j] = {i + 1, analysisKeys[i].averageIc};
                 break;
             }
         }
+        /************************ TO MOOVE LATER ************************/
     }
 
+    // Display results of the best key with its decoded text
     for (int j = 0; j < NB_BEST_KEYSIZES; j++)
     {   
+
         if (bestKeySizes[j].first != -1)
         {
             analysisKeys[bestKeySizes[j].first - 1].getKeys(language);
@@ -51,6 +63,7 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string
     }
 }
 
+
 const string VigenereCryptanalysis::getEncodedCipher() const 
 {
     return encodedCipher;
@@ -60,158 +73,3 @@ const string VigenereCryptanalysis::getLanguage() const
 {
     return language;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// vector<std::string> VigenereCryptanalysis::getSubSequences(std::string & cipher, int & keySize)
-// {
-//     // Building subsequences for each letter of the key
-//     // To iterate we need to categorify each cypher's letter such as
-//     // cypher_letter_number % keySize Letter 1 will have all the 0 Letter 2 will
-//     // have all the 1
-//     // ..
-
-//     // Vector of subsquences
-
-
-//     vector<std::string> subSequences(keySize);
-
-//     for (long unsigned int i = 0; i < cipher.size(); i++)
-//     {
-//         subSequences[i % keySize] += cipher[i];
-//     }
-
-//     return subSequences;
-// }
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// double VigenereCryptanalysis::getFrequencies(string text, char c)
-// {
-//     // Return the frequence of a letter
-//     // Ex: 'aieie" f(a) = 1/5: f(i)=f(e)=2/5
-//     double count = 0;
-//     for (auto letter : text)
-//     {
-//         if (letter == c)
-//             count++;
-//     }
-
-//     return count;
-// }
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// double VigenereCryptanalysis::calculateThePeriod(string text)
-// {
-
-//     // We take the frequencies for each letter
-//     double frequencies[NUMBER_OF_LETTER];
-//     for (auto letter = 'A'; letter <= 'Z'; letter++)
-//     {
-//         frequencies[letter - 'A'] = getFrequencies(text, letter);
-//     }
-
-//     // Calculate de IC
-//     double IC = 0;
-//     for (double f : frequencies)
-//     {
-//         IC += f * (f - 1) / (text.size() * (text.size() - 1));
-//     }
-
-//     return IC;
-// }
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// map<double, string> VigenereCryptanalysis::getEachPeriod(vector<string> &subSequences)
-// {
-
-//     map<double, string> subSequencesValues;
-
-//     for (string subSequence : subSequences)
-//     {
-//         subSequencesValues.insert({calculateThePeriod(subSequence), subSequence});
-//     }
-
-//     return subSequencesValues;
-// }
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// double VigenereCryptanalysis::averageOfPeriods(const map<double, string> &subSequencesPeriods)
-// {
-//     double average = 0.0;
-
-//     for (auto const &pair : subSequencesPeriods)
-//     {
-//         // We add to the average each IC value of the subsequences
-//         average += (pair.first);
-//     }
-
-//     // We divide the sum of IC values by the number of subsequences
-//     average /= (double)subSequencesPeriods.size();
-//     return average;
-// }
-
-/************************************************************************************/
-/* 																					*/
-/************************************************************************************/
-
-// vector<double> VigenereCryptanalysis::getAverages(string & cipher, int & maxKeySize)
-// {
-    
-//     vector<double> allAverages;
-//     vector<string> subSequences;
-//     map<double, string> subSequencesPeriods;
-//     double averageOfPeriod; 
-
-//     for (int i = 1; i < maxKeySize; i++)
-//     {
-//         subSequences        = getSubSequences(cipher, i);
-//         subSequencesPeriods = getEachPeriod(subSequences);
-//         averageOfPeriod     = averageOfPeriods(subSequencesPeriods);
-//         allAverages.push_back(averageOfPeriod);
-//     }
-
-//     return allAverages;
-// }
-
-// string static decrypt(string & cipher, int & maxKeySize);

@@ -1,6 +1,9 @@
 #include "vigenere.hpp"
 
-
+/********************************************/
+/* Constructor that take a key and check it */
+/* Contains only valide characters          */
+/********************************************/
 Vigenere::Vigenere(const std::string & initKey)
 {
     // Modifying all characters other than uppercase : lowercase -> uppercase, other -> delete
@@ -13,6 +16,14 @@ Vigenere::Vigenere(const std::string & initKey)
     }
 }
 
+
+/********************************************/
+/* Method that take in input a plain text   */
+/* and cipher it with the class key         */
+/* It also check (and remove if necessary)  */
+/* all the characters and keep, transform   */
+/* letter to uppercase                      */
+/********************************************/
 std::string Vigenere::encrypt(const std::string & text)
 {
     std::string out;
@@ -36,6 +47,12 @@ std::string Vigenere::encrypt(const std::string & text)
     return out;
 }
 
+
+/********************************************/
+/* Method that take as input a cipher text  */
+/* which must contains only uppercase letter*/
+/* and decipher it with the class key.      */
+/********************************************/
 std::string Vigenere::decrypt(const std::string & text)
 {
     // Text is all uppercase
@@ -59,7 +76,7 @@ std::string Vigenere::decrypt(const std::string & text)
         // decypher letter and converting into base 26
         int d = (cypher_letter - key[indice_key]) % 26;
         // checking if d < 0
-        d = d < 0 ? d + 26 : d;
+        d = (d < 0) ? d + 26 : d;
 
         // Reconvert into ASCII base
         char decipher_letter = d + 'A';
@@ -68,8 +85,7 @@ std::string Vigenere::decrypt(const std::string & text)
         out += decipher_letter;
 
         // Taking the next letter of the key
-        indice_key++;
-        indice_key %= key.length();
+        (++indice_key)%=key.length();
     }
 
     return out;
