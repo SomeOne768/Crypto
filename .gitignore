@@ -1,7 +1,10 @@
-../.vscode/
+.vscode
+.vscode/
 main_cipher.o
 analysisKeySize.o
 main_cryptanalysis.o
 vigenereCryptanalysis.o
 vigenere.o
 *.o
+test*
+tp2
