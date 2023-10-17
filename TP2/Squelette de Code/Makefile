@@ -8,8 +8,8 @@
 EXEC=tp2
 
 #Liste des fichiers sources separes par des espaces
-# SOURCES=main_cipher.cpp
-SOURCES=main_cryptanalysis.cpp vigenereCryptanalysis.cpp vigenere.cpp analysisKeySize.cpp
+SOURCES=main_cipher.cpp vigenere.cpp
+# SOURCES=main_cryptanalysis.cpp vigenereCryptanalysis.cpp vigenere.cpp analysisKeySize.cpp
 
 #Liste des fichiers objets
 OBJETS=$(SOURCES:%.cpp=%.o)
