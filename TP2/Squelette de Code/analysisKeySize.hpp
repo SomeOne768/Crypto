@@ -51,10 +51,7 @@ const std::map<std::string, std::pair<std::map<char, double>, double>> languages
 
 };
 
-//const int NUMBER_OF_LETTER 				= 26;
-
-
-const int NUMBER_OF_KEYS	= 3;
+const int NUMBER_OF_KEYS	= 5;
 const int NUMBER_OF_LETTER	= 1;
 const int NUMBER_OF_KEYSIZES= 3;
 const double MAX_CHISQUARED	= 9999999.9;

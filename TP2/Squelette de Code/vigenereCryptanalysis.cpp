@@ -1,12 +1,16 @@
 #include "vigenereCryptanalysis.hpp"
 #include <algorithm>
 #include <iostream>
+#include <cctype>
 
 // Constructor of a vigenereCryptanalysis object to decrypt an encoded string and find the key used to encode it 
 // with the vigenere algorithm
 VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string & languageInit, const int & maximumKeySize)
 : maxKeySize(maximumKeySize), language(languageInit), encodedCipher(cipher) 
 {
+
+    for (long unsigned int i = 0; i < encodedCipher.size(); i++) encodedCipher[i] = toupper(encodedCipher[i]);
+    
 
     std::vector<std::pair<int, double>> bestKeySizes(NUMBER_OF_KEYSIZES, {-1, 0.0});
     //double languageValue= languages.at(language).second;

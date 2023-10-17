@@ -70,9 +70,8 @@ double AnalysisKeySize::chiSquaredResult(const std::string & text, const long un
 void AnalysisKeySize::getKeys(std::string language)
 {   
 
-    std::cout << "ON ARRIVE LA " << std::endl;
-
     double currentChiSquared;
+
     std::string caesarDecoded;
     long unsigned int subsequenceSize;
 
@@ -105,6 +104,20 @@ void AnalysisKeySize::getKeys(std::string language)
             }
         }
     }
+    /*
+    if (keySize == 7)
+    {
+        for (int i = 0; i < keySize; i++){
+            std::cout << "Char " << i << " a pour valeurs : ";
+            for (int j = 0; j < NUMBER_OF_LETTER; j++)
+            {
+                std::cout << bestCharactersForKeys[i][j].first << " ";
+            }
+            std::cout << std::endl;
+
+        }
+        
+    }*/
 
     std::cout << "ON ARRIVE LA " << std::endl;
 
@@ -132,6 +145,7 @@ void generateCombinations(
         allCombinations.push_back(currentCombination);
         return;
     }
+
 
     for (const std::pair<char, double>& option : possibilities[currentPosition]) {
         // Ajoutez le caractère de cette colonne à la chaîne actuelle
@@ -206,7 +220,7 @@ void AnalysisKeySize::calculateKeysAndDecodes()
                     keysAndDecoded[k] = keysAndDecoded[k-1] ;
                 }
 
-                keysAndDecoded[i] = {ic, {possibleKey, encoded}};
+                keysAndDecoded[i] = {ic, {possibleKey, decoded}};
                 break;
             }
         }
