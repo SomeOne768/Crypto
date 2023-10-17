@@ -1,4 +1,5 @@
-../.vscode/
+.vscode
+.vscode/
 main_cipher.o
 analysisKeySize.o
 main_cryptanalysis.o
