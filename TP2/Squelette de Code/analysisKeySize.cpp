@@ -6,9 +6,9 @@
 /* Construct an object representing a keySize with its          */
 /* substrings and values for a specific cipher                  */
 /****************************************************************/
-AnalysisKeySize::AnalysisKeySize(const int kSize, const std::string &cipher)
-    : encoded(cipher), keySize(kSize), subSequences(kSize), keysAndDecoded(NUMBER_OF_KEYS, {0.0, {DEFAULT_STRING, DEFAULT_STRING}}),
-      bestCharactersForKeys(kSize, std::vector<std::pair<char, double>>(NUMBER_OF_LETTER, {DEFAULT_LETTER, 0}))
+AnalysisKeySize::AnalysisKeySize(const int kSize, const std::string & cipher)
+: encoded(cipher), keySize(kSize) , subSequences(kSize), keysAndDecoded(NB_BEST_KEYS_PER_KEYSIZE, {0.0, {DEFAULT_STRING, DEFAULT_STRING}}),
+bestCharactersForKeys(kSize, std::vector<std::pair<char, double>>(NB_BEST_CHARS, {DEFAULT_LETTER, 0}))
 {
 
     // Generate the substrings of the text
@@ -100,12 +100,12 @@ void AnalysisKeySize::getKeys(std::string language)
             // With this decoded string we can now get its chiSquared value
             currentChiSquared = chiSquaredResult(caesarDecoded, subsequenceSize, language);
 
-            for (int j = 0; j < NUMBER_OF_LETTER; j++)
+            for (int j = 0; j < NB_BEST_CHARS; j++)
             {
                 // The more the chiSquared value is close to zero the closest it is to its original language statistically
                 if ((bestCharactersForKeys[i - 1][j].first == DEFAULT_LETTER) || (currentChiSquared <= bestCharactersForKeys[i - 1][j].second))
                 {
-                    for (int k = NUMBER_OF_LETTER - 1; k > j; k--)
+                    for (int k = NB_BEST_CHARS -1; k > j; k--)
                     {
                         bestCharactersForKeys[i - 1][k] = bestCharactersForKeys[i - 1][k - 1];
                     }
@@ -130,8 +130,6 @@ void AnalysisKeySize::getKeys(std::string language)
         }
 
     }*/
-
-    std::cout << "ON ARRIVE LA " << std::endl;
 
     calculateKeysAndDecodes();
 }
@@ -223,12 +221,12 @@ void AnalysisKeySize::calculateKeysAndDecodes()
         decoded = decryptVigenere(encoded, possibleKey);
         ic = calculateIC(decoded);
 
-        for (int i = 0; i < NUMBER_OF_KEYS; i++)
+        for (int i = 0; i < NB_BEST_KEYS_PER_KEYSIZE; i++)
         {
             // The more the chiSquared value is close to zero the closest it is to its original language statistically
             if ((keysAndDecoded[i].second.first == DEFAULT_STRING) || (ic <= keysAndDecoded[i].first))
             {
-                for (int k = NUMBER_OF_KEYS - 1; k > i; k--)
+                for (int k = NB_BEST_KEYS_PER_KEYSIZE -1; k > i; k--)
                 {
                     keysAndDecoded[k] = keysAndDecoded[k - 1];
                 }

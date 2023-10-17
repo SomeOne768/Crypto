@@ -2,22 +2,24 @@
 #include <algorithm>
 #include <iostream>
 #include <cctype>
-
+sssssssssssssssssssssssssssssssssssssss
 /**************************************************************************/
 /* Constructor build an object that make the complete analysis            */
 /* It try to find the different possible keys and decipher the text       */
 /**************************************************************************/
-VigenereCryptanalysis::VigenereCryptanalysis(const string &cipher,
-                                             const string &languageInit, const int &maximumKeySize)
-    : maxKeySize(maximumKeySize), language(languageInit), encodedCipher(cipher)
+VigenereCryptanalysis::VigenereCryptanalysis(const string & cipher, const string & language,const int & maximumKeySize)
+: maxKeySize(maximumKeySize), encodedCipher(cipher) 
 {
     // transform each letter to uppercase
     for (long unsigned int i = 0; i < encodedCipher.size(); i++)
         encodedCipher[i] = toupper(encodedCipher[i]);
 
-    // Build a vector that will contains keys with their respectives
-    // size and IC sorted from best to worst
-    std::vector<std::pair<int, double>> bestKeySizes(NUMBER_OF_KEYSIZES, {-1, 0.0});
+    for (long unsigned int i = 0; i < encodedCipher.size(); i++) encodedCipher[i] = toupper(encodedCipher[i]);
+
+    std::vector<std::pair<int, double>> bestKeySizes(NB_BEST_KEYSIZES, {-1, 0.0});
+
+    // We calculate all the substrings and their values for each keySize from 1 to the maximum size passed in argument
+    for (int i = 0; i < maxKeySize; i++){
 
     // Make analysis for the different keysize
     for (int i = 0; i < maxKeySize; i++)
@@ -25,15 +27,13 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string &cipher,
         // Get the mean IC for the specifik keysize
         analysisKeys.push_back(AnalysisKeySize(i + 1, cipher));
 
-        /************************ TO MOOVE LATER ************************/
-        // Find the best key
-        for (int j = 0; j < NUMBER_OF_KEYSIZES; j++)
-        {
-            
+        for (int j = 0; j < NB_BEST_KEYSIZES; j++)
+        {   
+
             // The more the chiSquared value is close to zero the closest it is to its original language statistically
             if ((bestKeySizes[j].first == -1) || (analysisKeys[i].averageIc > bestKeySizes[j].second))
             {
-                for (int k = NUMBER_OF_KEYSIZES - 1; k > j; k--)
+                for (int k = NB_BEST_KEYSIZES -1; k > j; k--)
                 {
                     bestKeySizes[k] = bestKeySizes[k - 1];
                 }
@@ -45,27 +45,31 @@ VigenereCryptanalysis::VigenereCryptanalysis(const string &cipher,
         /************************ TO MOOVE LATER ************************/
     }
 
-
     // Display results of the best key with its decoded text
-    for (int j = 0; j < NUMBER_OF_KEYSIZES; j++)
-    {
+    for (int j = 0; j < NB_BEST_KEYSIZES; j++)
+    {   
+
         if (bestKeySizes[j].first != -1)
         {
-            analysisKeys[bestKeySizes[j].first - 1].getKeys(languageInit);
+            analysisKeys[bestKeySizes[j].first - 1].getKeys(language);
             for (std::pair<double, std::pair<std::string, std::string>> keyAndDecoded : analysisKeys[bestKeySizes[j].first - 1].keysAndDecoded)
             {
-                std::cout << "\n Key : " << keyAndDecoded.second.first << "\n Decoded :   " << keyAndDecoded.second.second << std::endl;
+                if (keyAndDecoded.second.first != DEFAULT_STRING)
+                {
+                    std::cout << "\nKey " << j << " : " << keyAndDecoded.second.first << "\nDecoded :   " <<  keyAndDecoded.second.second << std::endl;
+                }
             }
         }
     }
 }
 
-const string VigenereCryptanalysis::getLanguage() const
-{
-    return language;
-}
 
-const string VigenereCryptanalysis::getEncodedCipher() const
+const string VigenereCryptanalysis::getEncodedCipher() const 
 {
     return encodedCipher;
+}
+
+const string VigenereCryptanalysis::getLanguage() const 
+{
+    return language;
 }

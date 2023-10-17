@@ -17,7 +17,7 @@ const std::map<std::string, std::pair<std::map<char, double>, double>> languages
 			{'P', 2.07}, {'Q', 0.10}, {'R', 6.33}, {'S', 6.73}, {'T', 8.94},
 			{'U', 2.68}, {'V', 1.06}, {'W', 1.83}, {'X', 0.19}, {'Y', 1.72}, {'Z', 0.11}
 		}, 0.0667}
-	}, 
+	},
 
 	{"fra", {
 		{
@@ -51,9 +51,9 @@ const std::map<std::string, std::pair<std::map<char, double>, double>> languages
 
 };
 
-const int NUMBER_OF_KEYS	= 5;
-const int NUMBER_OF_LETTER	= 1;
-const int NUMBER_OF_KEYSIZES= 3;
+const int NB_BEST_KEYS_PER_KEYSIZE	= 5;
+const int NB_BEST_CHARS		= 1;
+const int NB_BEST_KEYSIZES	= 3;
 const double MAX_CHISQUARED	= 9999999.9;
 
 const char DEFAULT_LETTER		= '%';
