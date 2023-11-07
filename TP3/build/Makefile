@@ -129,6 +129,30 @@ tp3/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/tp3.dir/build.make CMakeFiles/tp3.dir/build
 .PHONY : tp3/fast
 
+src/F216.o: src/F216.cpp.o
+.PHONY : src/F216.o
+
+# target to build an object file
+src/F216.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tp3.dir/build.make CMakeFiles/tp3.dir/src/F216.cpp.o
+.PHONY : src/F216.cpp.o
+
+src/F216.i: src/F216.cpp.i
+.PHONY : src/F216.i
+
+# target to preprocess a source file
+src/F216.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tp3.dir/build.make CMakeFiles/tp3.dir/src/F216.cpp.i
+.PHONY : src/F216.cpp.i
+
+src/F216.s: src/F216.cpp.s
+.PHONY : src/F216.s
+
+# target to generate assembly for a file
+src/F216.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/tp3.dir/build.make CMakeFiles/tp3.dir/src/F216.cpp.s
+.PHONY : src/F216.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... tp3"
+	@echo "... src/F216.o"
+	@echo "... src/F216.i"
+	@echo "... src/F216.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

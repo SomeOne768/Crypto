@@ -37,18 +37,13 @@ message ( STATUS "Compiler flags: ${CMAKE_CXX_FLAGS}" )
 
 # Sources #-----------------------------------------------------------------------------------------
 set ( ZZ3_HEADERS
-      
+      src/P16.hpp
     )
 
 set ( ZZ3_SOURCES
-      
+      src/P16.cpp
     )
 
-set ( ZZ3_HEADERS_TEST
-    )
-
-set ( ZZ3_SOURCES_TEST
-    )
 
 include_directories ( src/ )
 
