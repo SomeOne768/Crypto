@@ -17,4 +17,5 @@ public:
     void multiply(const P16&);
 
     P16 operator+(const P16 &);
+    P16& operator*(const P16 &);
 };

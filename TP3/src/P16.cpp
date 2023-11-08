@@ -28,3 +28,10 @@ void P16::multiply(const P16 &p)
                 this->multiplyX();
     }
 }
+
+
+P16& P16::operator*(const P16 &p)
+{
+    this->multiply(p);
+}
+
