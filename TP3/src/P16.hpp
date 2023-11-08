@@ -4,18 +4,17 @@
  * @brief class that respresent
  *
  */
-class P16
-{
-    short int polynome;
+class P16 {
 
 public:
-    P16() = default;
-    P16(short int x);
-    ~P16() = default;
+  short int polynome;
+  P16() = default;
+  P16(short int x);
+  ~P16() = default;
 
-    void multiplyX();
-    void multiply(const P16&);
+  void multiplyX();
+  void multiply(const P16 &);
 
-    P16 operator+(const P16 &);
-    P16& operator*(const P16 &);
+  P16 operator+(const P16 &);
+  P16 &operator*(const P16 &);
 };
