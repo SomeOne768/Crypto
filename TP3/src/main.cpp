@@ -2,11 +2,14 @@
 #include "block.hpp"
 #include <iostream>
 
+const int N = 1<<16;
+
+P16 tab[N];
 void buildInversor(P16 tab[]);
 void shiftRow(P16 &);
 
 int main() {
-  P16 tab[16];
+  
   buildInversor(tab);
 
   return 0;
@@ -14,7 +17,7 @@ int main() {
 
 void buildInversor(P16 tab[]) {
   P16 polynomeToFindInverse{1};
-  for (int i = 0; i < 16; i++) {
+  for (int i = 0; i < N; i++) {
 
     P16 polynomeInverse{1};
 
@@ -23,7 +26,7 @@ void buildInversor(P16 tab[]) {
     }
 
     tab[i] = polynomeInverse;
-    polynomeToFindInverse.polynome <<= 1;
+    polynomeToFindInverse.polynome++;
   }
 }
 
