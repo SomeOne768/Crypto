@@ -34,7 +34,12 @@ private:
 
   uint8_t roundFunc_inv(uint8_t input) {
     // TODO
-    return 1;
+    // cipher -> xor -> S -> xor -> plaintext
+    uint8_t step1= XOR(input, k1);
+    uint8_t step2 = evaluateSinv(step1);
+    uint8_t step3 = XOR(step2, k0);
+
+    return step3;
   }
 
 public:
@@ -68,6 +73,11 @@ public:
   uint8_t evaluateS(const uint8_t &input) 
   {
     return S[input];
+  }
+
+  uint8_t evaluateSinv(const uint8_t &input) 
+  {
+    return S_inv[input];
   }
 };
 
