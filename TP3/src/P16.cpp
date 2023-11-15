@@ -4,7 +4,8 @@ P16::P16(short int x) : polynome(x) {}
 
 P16 P16::operator+(const P16 &p)
 {
-    return P16{p.polynome ^ polynome};
+    short int res = p.polynome ^ polynome;
+    return P16{res};
 }
 
 void P16::multiplyX()
@@ -22,7 +23,7 @@ void P16::multiply(const P16 &p)
     short int last = p.polynome;
     for (int i = 1; i < 15; i++)
     {
-        last <= 1;
+        last <<= 1;
         if (last % 2 == 1)
             for (int j = 0; j < i; j++)
                 this->multiplyX();
@@ -33,5 +34,6 @@ void P16::multiply(const P16 &p)
 P16& P16::operator*(const P16 &p)
 {
     this->multiply(p);
+    return *this;
 }
 
