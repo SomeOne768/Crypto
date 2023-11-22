@@ -3,6 +3,7 @@
 #include <string>
 using namespace std;
 
+/*  Boite S et son inverse */
 static const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
                               0x8, 0xB, 0xF, 0x2, 0xD, 0xC, 0x0, 0x7};
 
@@ -14,13 +15,6 @@ class Cipher {
 private:
   uint8_t k0;
   uint8_t k1;
-
-  /*  Boite S et son inverse */
-  const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
-                         0x8, 0xB, 0xF, 0x2, 0xD, 0xC, 0x0, 0x7};
-
-  const uint8_t S_inv[16] = {0xE, 0x2, 0xB, 0x0, 0x4, 0x6, 0x7, 0xF,
-                             0x8, 0x5, 0x3, 0x9, 0xD, 0xC, 0x1, 0xA};
 
   uint8_t roundFunc(uint8_t input) {
     // plaintext -> xor -> S - xor ->cipher
@@ -123,8 +117,8 @@ public:
     for (X=0; X<16; X++){
       for (Xp=0; Xp<16; Xp++){
         
-        Y = Cipher.evaluateS(X);
-        Yp = Cipher.evaluateS(Xp);
+        Y = Cipher::evaluateS(X);
+        Yp = Cipher::evaluateS(Xp);
 
         DX = (X ^ Xp);
         DY = (Y ^ Yp);
@@ -186,20 +180,6 @@ public:
         printf("X: %x, Y: %x --> Xp: %x, Yp: %x\n", X, Y, Xp, Yp);
       }
     }
-  }
-
-
-  void genCharData(int diffIn, int diffOut) {
-    printf("\n Generating possible intermediate values based on differential "
-           "(%x --> %x):\n",
-           diffIn, diffOut);
-
-    for (uint8_t i=0; i<16; i++){
-      uint8_t X = S[i];
-
-
-    }
-    // TODO
   }
 
   void genPairs(Cipher cipher, uint8_t diffIn, int nbPairs) {
