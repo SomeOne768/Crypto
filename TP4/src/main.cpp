@@ -23,23 +23,21 @@ private:
                              0x8, 0x5, 0x3, 0x9, 0xD, 0xC, 0x1, 0xA};
 
   uint8_t roundFunc(uint8_t input) {
-    // TODO
     // plaintext -> xor -> S - xor ->cipher
-    uint8_t step1 = XOR(input, k0);
-    uint8_t step2 = evaluateS(step1);
-    uint8_t step3 = XOR(step2, k1);
+    uint8_t cypher =  XOR(input, k0);
+    cypher = evaluateS(cypher);
+    cypher = XOR(cypher, k1);
 
-    return step3;
+    return cypher;
   }
 
   uint8_t roundFunc_inv(uint8_t input) {
-    // TODO
     // cipher -> xor -> S -> xor -> plaintext
-    uint8_t step1= XOR(input, k1);
-    uint8_t step2 = evaluateSinv(step1);
-    uint8_t step3 = XOR(step2, k0);
+    uint8_t plain =  XOR(input, k1);
+    plain = evaluateSinv(plain);
+    plain = XOR(plain, k0);
 
-    return step3;
+    return plain;
   }
 
 public:
@@ -58,12 +56,18 @@ public:
 
   uint8_t encrypt(uint8_t input) {
     // TODO
-    return 0;
+    uint8_t cypher = input;
+    for(int i=0; i<16; i++)
+      cypher = roundFunc(cypher);
+    return cypher;
   }
 
   uint8_t decrypt(uint8_t input) {
     // TODO
-    return 0;
+    uint8_t plain = input;
+    for(int i=0; i<16; i++)
+      plain = roundFunc_inv(plain);
+    return plain;
   }
 
   static uint8_t XOR(const uint8_t &input, const uint8_t &key) {
