@@ -1,7 +1,10 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
+
+
 
 /*  Boite S et son inverse */
 static const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
@@ -9,6 +12,8 @@ static const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
 
 static const uint8_t S_inv[16] = {0xE, 0x2, 0xB, 0x0, 0x4, 0x6, 0x7, 0xF,
                                   0x8, 0x5, 0x3, 0x9, 0xD, 0xC, 0x1, 0xA};
+
+
 
 /* Cipher to cryptanalyse */
 class Cipher {
@@ -98,6 +103,9 @@ private:
 public:
   Cryptanalysis() { chardatmax = 0; }
 
+
+    std::vector<std::pair<uint8_t, uint8_t>> xAndXprime[16];
+
   /* Difference Distribution Table of the S-boxe */
   void findBestDiffs(void){
     uint8_t i,j;
@@ -116,13 +124,16 @@ public:
 
     for (X=0; X<16; X++){
       for (Xp=0; Xp<16; Xp++){
-        
+
         Y = Cipher::evaluateS(X);
         Yp = Cipher::evaluateS(Xp);
 
         DX = (X ^ Xp);
         DY = (Y ^ Yp);
 
+        if (X+Xp != 0){
+          xAndXprime[DX].push_back(std::make_pair(X, Xp));
+        }
         T[DX][DY] += 1;
       }
     }
@@ -183,8 +194,9 @@ public:
   }
 
   void genPairs(Cipher cipher, uint8_t diffIn, int nbPairs) {
-    printf("\n Generating %i known pairs with input differential of %x.\n",
-           nbPairs, diffIn);
+    printf("\n Generating %i known pairs with input differential of %x.\n", nbPairs, diffIn);
+
+  
 
     /* Question 2 : compléter le code afin de produire des paires de chiffrés
      * avec la bonne différence */
