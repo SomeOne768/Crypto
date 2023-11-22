@@ -74,12 +74,12 @@ public:
     return input ^ key;
   }
 
-  uint8_t evaluateS(const uint8_t &input) 
+  static uint8_t evaluateS(const uint8_t &input) 
   {
     return S[input];
   }
 
-  uint8_t evaluateSinv(const uint8_t &input) 
+  static uint8_t evaluateSinv(const uint8_t &input) 
   {
     return S_inv[input];
   }
@@ -105,44 +105,100 @@ public:
   Cryptanalysis() { chardatmax = 0; }
 
   /* Difference Distribution Table of the S-boxe */
-  void findBestDiffs(void) {
-    uint8_t i, j;
-    uint8_t X, Xp, Y, Yp, DX, DY;
+  void findBestDiffs(void){
+    uint8_t i,j;
+    uint8_t X,Xp,Y,Yp,DX,DY; 
     uint8_t T[16][16]; // Tableau pour comptabiliser les occurrences
-    for (i = 0; i < 16; ++i) {
-      for (j = 0; j < 16; ++j) {
-        T[i][j] = 0;
+    for (i=0;i<16;++i){
+      for (j=0;j<16;++j){
+	      T[i][j]=0;
       }
     }
 
     printf("\n Creating XOR differential table:\n");
-
-    /* Question 1 : compléter le code afin d'afficher la matrice T des
-     * différences */
+      
+    /* Question 1 : compléter le code afin d'afficher la matrice T des différences */
     // TODO
 
+    for (X=0; X<16; X++){
+      for (Xp=0; Xp<16; Xp++){
+        
+        Y = Cipher.evaluateS(X);
+        Yp = Cipher.evaluateS(Xp);
+
+        DX = (X ^ Xp);
+        DY = (Y ^ Yp);
+
+        T[DX][DY] += 1;
+      }
+    }
+
     /* Affichage des différences dans un tableau */
-    for (i = 0; i < 16; ++i) {
+    for (i=0;i<16;++i){
       printf("[");
-      for (j = 0; j < 16; ++j) {
-        printf(" %u ", T[i][j]);
+      for (j=0;j<16;++j){
+      	printf(" %u ",T[i][j]);
       }
       printf("]\n");
     }
 
     printf("\n Displaying most probable differentials:\n");
 
+    for (i=0; i<16; i++){
+      uint8_t v = 100;
+      uint8_t p[16];
+      for (j=0; j<16; j++){
+        if (v >= T[i][j] && p[T[i][j]] != 1){
+          v = T[i][j];
+          p[T[i][j]] = 1;
+        }
+      }
+      printf("%u : %u\n", i, v);
+    }
+
     /* TODO */
-    /* Identifier les différentielles apparaissant avec plus forte probabilité
-     */
+    /* Identifier les différentielles apparaissant avec plus forte probabilité */
     /* Elles seront exploitées dans la suite de l'attaque */
   }
+
+
+  void genCharData(int diffIn, int diffOut)
+  {
+    printf("\n Generating possible intermediate values based on differential (%x --> %x):\n", diffIn, diffOut);
+
+    for (uint8_t X = 0; X < 16; ++X)
+    {
+      // Calculer la sortie Y pour l'entrée X
+      uint8_t Y = S[X];
+
+      // Appliquer la différence d'entrée pour obtenir Xp
+      uint8_t Xp = X ^ diffIn;
+
+      // Calculer la sortie Yp pour l'entrée modifiée Xp
+      uint8_t Yp = S[Xp];
+
+      // Pour vérifier la différence de sortie on calcul
+      uint8_t diffIn = Y ^ Yp;
+
+      // Si la différence de sortie correspond à diffOut, affichez les valeurs intermédiaires
+      if (diffIn == diffOut)
+      {
+        printf("X: %x, Y: %x --> Xp: %x, Yp: %x\n", X, Y, Xp, Yp);
+      }
+    }
+  }
+
 
   void genCharData(int diffIn, int diffOut) {
     printf("\n Generating possible intermediate values based on differential "
            "(%x --> %x):\n",
            diffIn, diffOut);
 
+    for (uint8_t i=0; i<16; i++){
+      uint8_t X = S[i];
+
+
+    }
     // TODO
   }
 
