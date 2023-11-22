@@ -105,36 +105,64 @@ public:
   Cryptanalysis() { chardatmax = 0; }
 
   /* Difference Distribution Table of the S-boxe */
-  void findBestDiffs(void) {
-    uint8_t i, j;
-    uint8_t X, Xp, Y, Yp, DX, DY;
+  void findBestDiffs(void){
+    uint8_t i,j;
+    uint8_t X,Xp,Y,Yp,DX,DY; 
     uint8_t T[16][16]; // Tableau pour comptabiliser les occurrences
-    for (i = 0; i < 16; ++i) {
-      for (j = 0; j < 16; ++j) {
-        T[i][j] = 0;
+    for (i=0;i<16;++i){
+      for (j=0;j<16;++j){
+	      T[i][j]=0;
       }
     }
 
     printf("\n Creating XOR differential table:\n");
-
-    /* Question 1 : compléter le code afin d'afficher la matrice T des
-     * différences */
+      
+    /* Question 1 : compléter le code afin d'afficher la matrice T des différences */
     // TODO
 
+    for (i=0; i<16; i++){
+      for (j=0; j<16; j++){
+        DX = i;
+        DY = j;
+        // Y = S[X];
+        // Yp = S[Xp];
+        for (uint8_t k=0; k<16; k++){
+          T[i][j] += (DX ^ DY);
+
+          DX = (DX ^ Xp);
+          Xp = DX;
+
+          DY = (DY ^ Yp);
+          Yp = DY;
+        }
+      }
+    }
+
     /* Affichage des différences dans un tableau */
-    for (i = 0; i < 16; ++i) {
+    for (i=0;i<16;++i){
       printf("[");
-      for (j = 0; j < 16; ++j) {
-        printf(" %u ", T[i][j]);
+      for (j=0;j<16;++j){
+      	printf(" %u ",T[i][j]);
       }
       printf("]\n");
     }
 
     printf("\n Displaying most probable differentials:\n");
 
+    for (i=0; i<16; i++){
+      uint8_t v = 100;
+      uint8_t p[16];
+      for (j=0; j<16; j++){
+        if (v >= T[i][j] && p[T[i][j]] != 1){
+          v = T[i][j];
+          p[T[i][j]] = 1;
+        }
+      }
+      printf("%u : %u\n", i, v);
+    }
+
     /* TODO */
-    /* Identifier les différentielles apparaissant avec plus forte probabilité
-     */
+    /* Identifier les différentielles apparaissant avec plus forte probabilité */
     /* Elles seront exploitées dans la suite de l'attaque */
   }
 
