@@ -193,17 +193,6 @@ public:
     }
   }
 
-  void genPairs(Cipher cipher, uint8_t diffIn, int nbPairs) {
-    printf("\n Generating %i known pairs with input differential of %x.\n", nbPairs, diffIn);
-
-  
-
-    /* Question 2 : compléter le code afin de produire des paires de chiffrés
-     * avec la bonne différence */
-
-    // TODO
-  }
-
   void findGoodPair(int diffOut, int nbPairs) {
     printf("\n Searching for good pair:\n");
 
