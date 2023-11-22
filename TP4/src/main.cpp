@@ -9,6 +9,20 @@ static const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
 static const uint8_t S_inv[16] = {0xE, 0x2, 0xB, 0x0, 0x4, 0x6, 0x7, 0xF,
                                   0x8, 0x5, 0x3, 0x9, 0xD, 0xC, 0x1, 0xA};
 
+uint8_t evaluateS(const uint8_t &input) 
+{
+  return S[input];
+}
+
+uint8_t evaluateSinv(const uint8_t &input) 
+{
+  return S_inv[input];
+}
+
+uint8_t XOR(const uint8_t &input, const uint8_t &key) {
+  return input ^ key;
+}
+
 /* Cipher to cryptanalyse */
 class Cipher {
 private:
@@ -69,20 +83,6 @@ public:
       plain = roundFunc_inv(plain);
     return plain;
   }
-
-  static uint8_t XOR(const uint8_t &input, const uint8_t &key) {
-    return input ^ key;
-  }
-
-  static uint8_t evaluateS(const uint8_t &input) 
-  {
-    return S[input];
-  }
-
-  static uint8_t evaluateSinv(const uint8_t &input) 
-  {
-    return S_inv[input];
-  }
 };
 
 class Cryptanalysis {
@@ -123,8 +123,8 @@ public:
     for (X=0; X<16; X++){
       for (Xp=0; Xp<16; Xp++){
         
-        Y = Cipher.evaluateS(X);
-        Yp = Cipher.evaluateS(Xp);
+        Y = evaluateS(X);
+        Yp = evaluateS(Xp);
 
         DX = (X ^ Xp);
         DY = (Y ^ Yp);
@@ -167,13 +167,13 @@ public:
     for (uint8_t X = 0; X < 16; ++X)
     {
       // Calculer la sortie Y pour l'entrée X
-      uint8_t Y = Cipher.evaluateS(X);
+      uint8_t Y = evaluateS(X);
 
       // Appliquer la différence d'entrée pour obtenir Xp
       uint8_t Xp = X ^ diffIn;
 
       // Calculer la sortie Yp pour l'entrée modifiée Xp
-      uint8_t Yp = Cipher.evaluateS(Xp);
+      uint8_t Yp = evaluateS(Xp);
 
       // Pour vérifier la différence de sortie on calcul
       uint8_t diffIn = Y ^ Yp;
@@ -243,9 +243,9 @@ int main() {
   uint8_t diffIn = 0;
   uint8_t diffOut = 0;
 
-  // Cryptanalysis cryptanalysis;
-  // cryptanalysis.findBestDiffs(); //Find some good differentials in the
-  // S-Boxes cryptanalysis.genCharData(diffIn, diffOut); //Find inputs that lead
+  Cryptanalysis cryptanalysis;
+  cryptanalysis.findBestDiffs(); //Find some good differentials in the
+  cryptanalysis.genCharData(diffIn, diffOut); //Find inputs that lead
   // a certain characteristic cryptanalysis.genPairs(cipher, diffIn, nbPairs);
   // //Generate chosen-plaintext pairs
   // cryptanalysis.findGoodPair(diffOut,nbPairs); //Choose a known pair that
