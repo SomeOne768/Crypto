@@ -74,12 +74,12 @@ public:
     return input ^ key;
   }
 
-  uint8_t evaluateS(const uint8_t &input) 
+  static uint8_t evaluateS(const uint8_t &input) 
   {
     return S[input];
   }
 
-  uint8_t evaluateSinv(const uint8_t &input) 
+  static uint8_t evaluateSinv(const uint8_t &input) 
   {
     return S_inv[input];
   }
@@ -120,21 +120,16 @@ public:
     /* Question 1 : compléter le code afin d'afficher la matrice T des différences */
     // TODO
 
-    for (i=0; i<16; i++){
-      for (j=0; j<16; j++){
-        DX = i;
-        DY = j;
-        // Y = S[X];
-        // Yp = S[Xp];
-        for (uint8_t k=0; k<16; k++){
-          T[i][j] += (DX ^ DY);
+    for (X=0; X<16; X++){
+      for (Xp=0; Xp<16; Xp++){
+        
+        Y = Cipher.evaluateS(X);
+        Yp = Cipher.evaluateS(Xp);
 
-          DX = (DX ^ Xp);
-          Xp = DX;
+        DX = (X ^ Xp);
+        DY = (Y ^ Yp);
 
-          DY = (DY ^ Yp);
-          Yp = DY;
-        }
+        T[DX][DY] += 1;
       }
     }
 
@@ -166,11 +161,44 @@ public:
     /* Elles seront exploitées dans la suite de l'attaque */
   }
 
+
+  void genCharData(int diffIn, int diffOut)
+  {
+    printf("\n Generating possible intermediate values based on differential (%x --> %x):\n", diffIn, diffOut);
+
+    for (uint8_t X = 0; X < 16; ++X)
+    {
+      // Calculer la sortie Y pour l'entrée X
+      uint8_t Y = S[X];
+
+      // Appliquer la différence d'entrée pour obtenir Xp
+      uint8_t Xp = X ^ diffIn;
+
+      // Calculer la sortie Yp pour l'entrée modifiée Xp
+      uint8_t Yp = S[Xp];
+
+      // Pour vérifier la différence de sortie on calcul
+      uint8_t diffIn = Y ^ Yp;
+
+      // Si la différence de sortie correspond à diffOut, affichez les valeurs intermédiaires
+      if (diffIn == diffOut)
+      {
+        printf("X: %x, Y: %x --> Xp: %x, Yp: %x\n", X, Y, Xp, Yp);
+      }
+    }
+  }
+
+
   void genCharData(int diffIn, int diffOut) {
     printf("\n Generating possible intermediate values based on differential "
            "(%x --> %x):\n",
            diffIn, diffOut);
 
+    for (uint8_t i=0; i<16; i++){
+      uint8_t X = S[i];
+
+
+    }
     // TODO
   }
 
