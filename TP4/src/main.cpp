@@ -145,12 +145,10 @@ public:
     printf("\n Displaying most probable differentials:\n");
 
     for (i=0; i<16; i++){
-      uint8_t v = 100;
-      uint8_t p[16];
+      uint8_t v = 0;
       for (j=0; j<16; j++){
-        if (v >= T[i][j] && p[T[i][j]] != 1){
+        if (v < T[i][j]){
           v = T[i][j];
-          p[T[i][j]] = 1;
         }
       }
       printf("%u : %u\n", i, v);
@@ -169,13 +167,13 @@ public:
     for (uint8_t X = 0; X < 16; ++X)
     {
       // Calculer la sortie Y pour l'entrée X
-      uint8_t Y = S[X];
+      uint8_t Y = Cipher.evaluateS(X);
 
       // Appliquer la différence d'entrée pour obtenir Xp
       uint8_t Xp = X ^ diffIn;
 
       // Calculer la sortie Yp pour l'entrée modifiée Xp
-      uint8_t Yp = S[Xp];
+      uint8_t Yp = Cipher.evaluateS(Xp);
 
       // Pour vérifier la différence de sortie on calcul
       uint8_t diffIn = Y ^ Yp;
@@ -186,20 +184,6 @@ public:
         printf("X: %x, Y: %x --> Xp: %x, Yp: %x\n", X, Y, Xp, Yp);
       }
     }
-  }
-
-
-  void genCharData(int diffIn, int diffOut) {
-    printf("\n Generating possible intermediate values based on differential "
-           "(%x --> %x):\n",
-           diffIn, diffOut);
-
-    for (uint8_t i=0; i<16; i++){
-      uint8_t X = S[i];
-
-
-    }
-    // TODO
   }
 
   void genPairs(Cipher cipher, uint8_t diffIn, int nbPairs) {
