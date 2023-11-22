@@ -4,12 +4,16 @@
 #include <vector>
 using namespace std;
 
+
+
 /*  Boite S et son inverse */
 static const uint8_t S[16] = {0x3, 0xE, 0x1, 0xA, 0x4, 0x9, 0x5, 0x6,
                               0x8, 0xB, 0xF, 0x2, 0xD, 0xC, 0x0, 0x7};
 
 static const uint8_t S_inv[16] = {0xE, 0x2, 0xB, 0x0, 0x4, 0x6, 0x7, 0xF,
                                   0x8, 0x5, 0x3, 0x9, 0xD, 0xC, 0x1, 0xA};
+
+
 
 /* Cipher to cryptanalyse */
 class Cipher
@@ -110,6 +114,9 @@ public:
   std::vector<std::pair<uint8_t, uint8_t>> bestProba;
   Cryptanalysis() { chardatmax = 0; }
 
+
+    std::vector<std::pair<uint8_t, uint8_t>> xAndXprime[16];
+
   /* Difference Distribution Table of the S-boxe */
   void findBestDiffs(void)
   {
@@ -128,6 +135,7 @@ public:
 
     /* Question 1 : compléter le code afin d'afficher la matrice T des différences */
 
+
     for (X = 0; X < 16; X++)
     {
       for (Xp = 0; Xp < 16; Xp++)
@@ -139,6 +147,9 @@ public:
         DX = (X ^ Xp);
         DY = (Y ^ Yp);
 
+        if (X+Xp != 0){
+          xAndXprime[DX].push_back(std::make_pair(X, Xp));
+        }
         T[DX][DY] += 1;
       }
     }
