@@ -4,6 +4,7 @@
 #include <vector>
 #include <tuple>
 #include <map>
+#include <algorithm>
 using namespace std;
 
 /*  Boite S et son inverse */
@@ -114,15 +115,19 @@ public:
     std::vector<std::pair<uint8_t, uint8_t>> bestProba;
     Cryptanalysis() { chardatmax = 0; }
 
-    std::vector<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>> xAndXprime[16];
-    std::vector<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>> yAndYprime[16];
+    using tuple4 = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
+    using listTuple4 = std::vector<tuple4>; // List of quadruplet
+    listTuple4 xAndXprime[16];
+    listTuple4 yAndYprime[16];
+
+    std::map<uint8_t, std::map<uint8_t, listTuple4>> linkStruct{}; // structure to access directly of the corresponding cypher and plain text
 
     /* Difference Distribution Table of the S-boxe */
     void findBestDiffs(void)
     {
         uint8_t i, j;
         uint8_t X, Xp, Y, Yp, DX, DY;
-        uint8_t T[16][16]; // Tableau pour comptabiliser les occurrences
+
         for (i = 0; i < 16; ++i)
         {
             for (j = 0; j < 16; ++j)
@@ -151,6 +156,8 @@ public:
                     xAndXprime[DX].push_back(std::make_tuple(X, Xp, Y, Yp));
                     yAndYprime[DY].push_back(std::make_tuple(X, Xp, Y, Yp));
                 }
+
+                linkStruct[DX][DY].push_back(std::make_tuple(X, Xp, Y, Yp));
                 T[DX][DY]++;
             }
         }
@@ -200,71 +207,55 @@ public:
             printf("(Dx, Dy) -> (%x, %x) : %x/16\n", elt.first, elt.second, T[elt.first][elt.second]);
     }
 
-    void genCharData(int diffIn, int diffOut)
+    void genCharData(uint8_t diffIn, uint8_t diffOut)
     {
         printf("\n Generating possible intermediate values based on differential (%x --> %x):\n", diffIn, diffOut);
 
-        uint8_t X, Xp, Y, Yp, DY;
-        std::vector<std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>> v{};
-        for (auto &elt : xAndXprime[diffIn])
+        if (linkStruct[diffIn][diffOut].size() == 0)
         {
-            X = get<0>(elt);
-            Xp = get<1>(elt);
-            Y = get<2>(elt);
-            Yp = get<3>(elt);
-            DY = Y ^ Yp;
-            if (DY == diffOut)
-                v.push_back(std::make_tuple(X, Xp, Y, Yp));
+            printf("\nNo value find\n");
+            return;
         }
 
         printf("Possible values for (Dx, Dy) = (%x, %x):\n", diffIn, diffOut);
-        for (auto &elt : v)
+        uint8_t X, Xp, Y, Yp, DY;
+        for (auto &elt : linkStruct[diffIn][diffOut])
+        {
             printf("(X, Xp, Y, Yp) -> (%x, %x, %x, %x)\n",
                    get<0>(elt), get<1>(elt), get<2>(elt), get<3>(elt));
-    }
-
-    void genPairs(uint8_t diffIn)
-    {
-        printf("\n Generating known pairs with input differential of %x.\n",
-               diffIn);
-
-        /* Question 2 : compléter le code afin de produire des paires de chiffrés
-         * avec la bonne différence */
+        }
     }
 
     void genPairs(Cipher &cipher, uint8_t diffIn, int nbPairs)
     {
-        // TO DISCUSS WITH T-SHIRT
+        // Assuming nbPairs arguments is usefull because we looked at the array and find an interessing value (dx, dy)
         printf("\n Generating %i known pairs with input differential of %x.\n", nbPairs, diffIn);
 
-        /* Question 2 : compléter le code afin de produire des paires de chiffrés avec la bonne différence */
+        uint8_t X, Xp, Y, Yp, j, max = 0;
+        // for (j = 0; j < 16; j++)
+        // {
+        //     max = (T[diffIn][j] > max) ? j : max;
+        // }
 
-        // On recherche : X et X' tq : X ^ X' = DX  et on souhaite ensuite les chiffrer
-        uint8_t X, Xp, Y, Yp;
-        int n = 0;
+        while (max < 16 && T[diffIn][max] != nbPairs)
+            max++;
 
-        cipher.cipher_pair.clear();
-
-        std::map<uint8_t, int> sorted;
-        for (uint8_t DY = 0; DY < 16; DY++)
+        if (max == 16)
         {
-            if (T[diffIn][DY] != 0)
-                sorted[DY] = T[diffIn][DY];
+            printf("nbPairs invalid !\n");
+            return;
         }
 
-        for (auto &elt : xAndXprime[diffIn])
+        // we find the index with max value
+
+        // We now display the plain and their cypher
+        for (auto &elt : linkStruct[diffIn][max])
         {
-
-            if (n == nbPairs)
-                break;
-
             X = get<0>(elt);
             Xp = get<1>(elt);
-            Y = get<2>(elt);
-            Yp = get<3>(elt);
-
-            cipher.cipher_pair.push_back(std::make_pair(Y, Yp));
-            n++;
+            Y = cipher.encrypt(X);
+            Yp = cipher.encrypt(Y);
+            printf("(X, Xp) -> (Y, Yp) <=> (%x, %x) -> (%x, %x)\n", X, Xp, Y, Yp);
         }
     }
 
@@ -275,21 +266,44 @@ public:
         /* Question 4 : compléter le code afin de produire une paire avec la bonne
          * caractéristique en se basant sur le chiffrement */
 
-        // TODO
-        if (true)
-            printf(" No good pair found!\n");
+        // chacun de ces blocs dans le système de chiffrement (qui utilise les clefs secrètes) pour obtenir C0
+        // et C1. Vous venez de produire une paire choisie sur la base de votre caractéristique différentielle.
+        // Si vous faites cela et que C0 ⊕C1 est égal à la différentielle de sortie de notre caractéristique
+        // choisie, alors il s’agit d’une bonne paire. Une fois que vous en avez trouvé une, vous pouvez vous
+        // arrêter. Conservez les autres mauvaises paires, mais mettez la bonne paire de côté pour l’étape
+        // suivante. Les autres paires seront utilisées pour valider les suppositions de clefs
+
+        // P0 -> P0 XOR diffInt = P1 -> algo = C0 et C1
+
+        uint8_t P0 = rand() % 16, d1 = 0;
+        uint8_t P1 = P0 ^ d1;
+
+        // We are looking for a pair X, X' such as DY = diffOut ordered in function of their 'T score'
+
+        uint8_t maxi = 0;
+        for (uint8_t i = 1; i < 16; i++)
+            maxi = (T[i][diffOut] > T[maxi][diffOut]) ? i : maxi;
+
+        int min = (nbPairs < linkStruct[maxi][diffOut].size()) ? nbPairs : linkStruct[maxi][diffOut].size();
+        for (int i = 0; i < min; ++i)
+        {
+            printf("Pair found : (X, Xp, Y, Yp) -> (%x, %x, %x, %x)\n",
+                   std::get<0>(linkStruct[maxi][diffOut].at(i)),
+                   std::get<1>(linkStruct[maxi][diffOut].at(i)),
+                   std::get<2>(linkStruct[maxi][diffOut].at(i)),
+                   std::get<3>(linkStruct[maxi][diffOut].at(i)));
+        }
     }
+
 
     int testKey(int testK0, int testK1, int nbPairs)
     {
-        // TODO
+
     }
 
     void crack(int nbPairs)
     {
         printf("\nBrute forcing reduced keyspace:\n");
-
-        // TODO
     }
 };
 
@@ -314,10 +328,10 @@ int main()
     else
         printf(" --> Failure\n");
 
-    int nbPairs = 1; // Define number of known pairs (note that 16 is a brut
+    int nbPairs = 6; // Define number of known pairs (note that 16 is a brut
                      // force)
-    uint8_t diffIn = 5;
-    uint8_t diffOut = 2;
+    uint8_t diffIn = 1;
+    uint8_t diffOut = 13;
 
     Cryptanalysis cryptanalysis;
     cryptanalysis.findBestDiffs();
@@ -325,14 +339,12 @@ int main()
     cryptanalysis.genCharData(diffIn, diffOut);
     // Find inputs that lead a certain characteristic
     cryptanalysis.genPairs(cipher, diffIn, nbPairs);
-    printf("Generated pair:\n");
-    for (auto &elt : cipher.cipher_pair)
-        printf("(Y, Yp) -> (%x, %x)\n", elt.first, elt.second);
     // Generate chosen-plaintext pairs
-    // cryptanalysis.findGoodPair(diffOut, nbPairs);
-    // Choose a known pair that satisfies the characteristic
+    cryptanalysis.findGoodPair(diffOut, nbPairs);
+    // // Choose a known pair that satisfies the characteristic
+
     // cryptanalysis.crack(nbPairs);
-    // Use charData and "good pair" in find key
+    // // Use charData and "good pair" in find key
 
     return 0;
 }
