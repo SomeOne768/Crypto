@@ -117,10 +117,12 @@ public:
 
     using tuple4 = std::tuple<uint8_t, uint8_t, uint8_t, uint8_t>;
     using listTuple4 = std::vector<tuple4>; // List of quadruplet
-    listTuple4 xAndXprime[16];
-    listTuple4 yAndYprime[16];
 
     std::map<uint8_t, std::map<uint8_t, listTuple4>> linkStruct{}; // structure to access directly of the corresponding cypher and plain text
+
+    // Q2:
+    std::vector<std::pair<uint8_t, uint8_t>> Q2;
+    std::vector<std::pair<uint8_t, uint8_t>> Q3;
 
     /* Difference Distribution Table of the S-boxe */
     void findBestDiffs(void)
@@ -150,12 +152,6 @@ public:
 
                 DX = (X ^ Xp);
                 DY = (Y ^ Yp);
-
-                if (DX != 0)
-                {
-                    xAndXprime[DX].push_back(std::make_tuple(X, Xp, Y, Yp));
-                    yAndYprime[DY].push_back(std::make_tuple(X, Xp, Y, Yp));
-                }
 
                 linkStruct[DX][DY].push_back(std::make_tuple(X, Xp, Y, Yp));
                 T[DX][DY]++;
@@ -229,6 +225,11 @@ public:
     void genPairs(Cipher &cipher, uint8_t diffIn, int nbPairs)
     {
         // Assuming nbPairs arguments is usefull because we looked at the array and find an interessing value (dx, dy)
+        // We want a pair (dx, dy) [keep it in memory]
+        // ===> NO BECAUSE: "Generate chosen-plaintext pairs"
+        // So we want X Xp pairs
+        // WHAT IS THE USE OF CIPHER ????
+        // CECI n'EST QU'UN ESSAIE DE TRADUCTION
         printf("\n Generating %i known pairs with input differential of %x.\n", nbPairs, diffIn);
 
         uint8_t X, Xp, Y, Yp, j, max = 0;
@@ -256,6 +257,9 @@ public:
             Y = cipher.encrypt(X);
             Yp = cipher.encrypt(Y);
             printf("(X, Xp) -> (Y, Yp) <=> (%x, %x) -> (%x, %x)\n", X, Xp, Y, Yp);
+
+            Q2.push_back(std::make_pair(X, Xp));
+            Q2.push_back(std::make_pair(Y, Yp));
         }
     }
 
@@ -275,30 +279,69 @@ public:
 
         // P0 -> P0 XOR diffInt = P1 -> algo = C0 et C1
 
-        uint8_t P0 = rand() % 16, d1 = 0;
-        uint8_t P1 = P0 ^ d1;
+        // uint8_t P0 = rand() % 16, d1 = 0;
+        // uint8_t P1 = P0 ^ d1;
 
-        // We are looking for a pair X, X' such as DY = diffOut ordered in function of their 'T score'
+        // // We are looking for a pair X, X' such as DY = diffOut ordered in function of their 'T score'
 
-        uint8_t maxi = 0;
-        for (uint8_t i = 1; i < 16; i++)
-            maxi = (T[i][diffOut] > T[maxi][diffOut]) ? i : maxi;
+        // uint8_t maxi = 0;
+        // for (uint8_t i = 1; i < 16; i++)
+        //     maxi = (T[i][diffOut] > T[maxi][diffOut]) ? i : maxi;
 
-        int min = (nbPairs < linkStruct[maxi][diffOut].size()) ? nbPairs : linkStruct[maxi][diffOut].size();
-        for (int i = 0; i < min; ++i)
+        // int min = (nbPairs < linkStruct[maxi][diffOut].size()) ? nbPairs : linkStruct[maxi][diffOut].size();
+        // for (int i = 0; i < min; ++i)
+        // {
+        //     printf("Pair found : (X, Xp, Y, Yp) -> (%x, %x, %x, %x)\n",
+        //            std::get<0>(linkStruct[maxi][diffOut].at(i)),
+        //            std::get<1>(linkStruct[maxi][diffOut].at(i)),
+        //            std::get<2>(linkStruct[maxi][diffOut].at(i)),
+        //            std::get<3>(linkStruct[maxi][diffOut].at(i)));
+        // }
+
+        // Parmis les paires sauvegardées, on cherche les pair qui donneront 'diffout'
+        uint8_t X, Xp, Y, Yp;
+        for (int i = 0; i < Q2.size() / 2; i++)
         {
-            printf("Pair found : (X, Xp, Y, Yp) -> (%x, %x, %x, %x)\n",
-                   std::get<0>(linkStruct[maxi][diffOut].at(i)),
-                   std::get<1>(linkStruct[maxi][diffOut].at(i)),
-                   std::get<2>(linkStruct[maxi][diffOut].at(i)),
-                   std::get<3>(linkStruct[maxi][diffOut].at(i)));
+            X = Q2[i].first;
+            Xp = Q2[i].second;
+            Y = Q2[i + 1].first;
+            Yp = Q2[i + 1].second;
+
+            if ((Y ^ Yp) == diffOut)
+            {
+                printf("Pair found : (X, Xp, Y, Yp) -> (%x, %x, %x, %x)\n", X, Xp, Y, Yp);
+                Q3.push_back(std::make_pair(X, Xp));
+                Q3.push_back(std::make_pair(Y, Yp));
+            }
         }
     }
 
-
-    int testKey(int testK0, int testK1, int nbPairs)
+    bool testKey(int testK0, int testK1, int nbPairs)
     {
+        // Test simplement le chiffrement avec ces clés et comparer le chiffré
+        bool res = false;
+        uint8_t X, Xp, Y, Yp;
+        for (int i = 0; i < nbPairs; ++i)
+        {
+            Cipher cipher(testK0, testK1);
 
+            X = Q2[2*i].first;
+            Xp = Q2[2*i].second;
+            Y = Q2[2*i + 1].first;
+            Yp = Q2[2*i + 1].second;
+
+            uint8_t decryptedP0 = cipher.decrypt(knownC0[i]);
+            uint8_t decryptedP1 = cipher.decrypt(knownC1[i]);
+
+            if (Y == decryptedP0 && Yp == decryptedP1)
+            {
+                // On a une bonne paire de clés
+                res = true;
+                break; 
+            }
+        }
+
+        return res;
     }
 
     void crack(int nbPairs)
@@ -341,10 +384,10 @@ int main()
     cryptanalysis.genPairs(cipher, diffIn, nbPairs);
     // Generate chosen-plaintext pairs
     cryptanalysis.findGoodPair(diffOut, nbPairs);
-    // // Choose a known pair that satisfies the characteristic
+    // Choose a known pair that satisfies the characteristic
 
-    // cryptanalysis.crack(nbPairs);
-    // // Use charData and "good pair" in find key
+    cryptanalysis.crack(nbPairs);
+    // Use charData and "good pair" in find key
 
     return 0;
 }
