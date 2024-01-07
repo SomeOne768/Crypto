@@ -166,4 +166,10 @@ int main()
 
     mpz_clear(M);
     mpz_clear(c);
+    
+    mpz_clear(increment);
+    mpz_clear(tmp);
+    mpz_clear(r);
+    mpz_clear(min);
+    mpz_clear(base);
 }
