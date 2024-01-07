@@ -87,6 +87,8 @@ int main()
 
     } while (!mpz_cmp(p, q));
 
+    mpz_get_str(p_str, 10, p);
+    mpz_get_str(q_str, 10, q);
     std::cout << "Random Prime 'p' = " << p_str << std::endl;
     std::cout << "Random Prime 'q' = " << q_str << std::endl;
 
@@ -127,9 +129,9 @@ int main()
     do
     {
         mpz_add(e, e, increment);
-        mpz_gcd(tmp, e, x);
-    } while (mpz_even_p(e) ||  mpz_cmp_ui(tmp, 1) != 0);
-    
+        mpz_gcd(tmp, x, e);
+    } while (mpz_even_p(e) || mpz_cmp_ui(tmp, 1) != 0);
+
     char e_str[1000];
     mpz_get_str(e_str, 10, e);
     std::cout << "\t e = " << e_str << std::endl;
@@ -149,9 +151,40 @@ int main()
      */
     std::cout << "Public Keys  (e,n): ( " << e_str << " , " << n_str << " )" << std::endl;
     std::cout << "Private Keys (d,n): ( " << d_str << " , " << n_str << " )" << std::endl;
+    
+
     /*
      *  Encrypt
      */
+
+    mpz_t message, ciphered, deciphered;
+    char Message[] = "1234567890"; // Message must be a number !
+    mpz_init(message);
+    mpz_init(ciphered);
+    mpz_init(deciphered);
+    mpz_set_str(message, Message, 10);
+
+    // Encrypt
+    mpz_powm(ciphered, message, e, n);
+    char ciphered_str[1000];
+    mpz_get_str(ciphered_str, 10, ciphered);
+
+    // Decrypt
+    mpz_powm(deciphered, ciphered, d, n);
+    char deciphered_str[1000];
+    mpz_get_str(deciphered_str, 10, deciphered);
+
+    std::cout << "\nCheck:\n";
+    mpz_t check1;
+    mpz_mul(check1, d, e);
+    mpz_mod(check1, check1, x);
+    char Check1[1000];
+    mpz_get_str(Check1, 10, check1);
+    std::cout << "e * d [n]=" << Check1 << "\n";
+
+    std::cout << "Message: " << Message << std::endl;
+    std::cout << "Ciphered message: " << ciphered_str << std::endl;
+    std::cout << "Deciphered message: " << deciphered_str << std::endl;
 
     /* Clean up the GMP integers */
     mpz_clear(p_minus_1);
@@ -166,7 +199,7 @@ int main()
 
     mpz_clear(M);
     mpz_clear(c);
-    
+
     mpz_clear(increment);
     mpz_clear(tmp);
     mpz_clear(r);
