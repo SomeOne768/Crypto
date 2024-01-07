@@ -119,7 +119,17 @@ int main()
     /*
      *  Step 3 : Get small odd integer e such that gcd(e,x) = 1.
      */
-    mpz_init_set_str(e, "79", 0);
+    mpz_t increment;
+    mpz_init(e);
+    mpz_init(increment);
+    mpz_init_set_str(e, "2", 0);
+    mpz_init_set_str(increment, "1", 0);
+    do
+    {
+        mpz_add(e, e, increment);
+        mpz_gcd(tmp, e, x);
+    } while (mpz_even_p(e) ||  mpz_cmp_ui(tmp, 1) != 0);
+    
     char e_str[1000];
     mpz_get_str(e_str, 10, e);
     std::cout << "\t e = " << e_str << std::endl;
