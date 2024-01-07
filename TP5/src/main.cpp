@@ -137,7 +137,8 @@ int main()
     /*
      *  Step 4 : Calculate unique d such that ed = 1(mod x)
      */
-    mpz_init_set_str(d, "1019", 0);
+    mpz_init(d);
+    mpz_invert(d, e, x);
     char d_str[1000];
     mpz_get_str(d_str, 10, d);
     std::cout << "\t d = " << d_str << std::endl
