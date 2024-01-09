@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <gmp.h>
-
+#include <stdlib.h>   
+#include <time.h>       
+#define TAILLE_MAX  16
 #define BITSTRENGTH 14              /* size of modulus (n) in bits */
 #define PRIMESIZE (BITSTRENGTH / 2) /* size of the primes p and q  */
 
@@ -158,7 +160,14 @@ int main()
      */
 
     mpz_t message, ciphered, deciphered;
-    char Message[] = "1234567890"; // Message must be a number !
+    
+    char Message[TAILLE_MAX]; // Message must be a number !
+    Message[0] = '0' + rand() % 9 + 1;
+    for(int i=1; i<TAILLE_MAX; i++)
+    {
+        Message[i] = '0' + rand() % 10;
+    }
+    
     mpz_init(message);
     mpz_init(ciphered);
     mpz_init(deciphered);
