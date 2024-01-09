@@ -19,7 +19,7 @@ mpz_t M, c;
 
 
 
-char genChar64()
+char genChar62()
 {
     int r = rand() %3;
     char c;
@@ -192,7 +192,7 @@ int main()
     Message[0] = 'A' ; // + rand() % (BASE-1) +1;
     for(int i=1; i<TAILLE_MAX; i++)
     {
-        Message[i] = genChar64();
+        Message[i] = genChar62();
     }
     
     mpz_init(message);
