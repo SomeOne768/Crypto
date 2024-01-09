@@ -166,7 +166,7 @@ int main()
     std::cout << "\t e = " << e_str << std::endl;
 
     /*
-     *  Step 4 : Calculate unique d such that ed = 1(mod x)
+     *  Step 4 : Calculate unique d such as ed = 1(mod x)
      */
     mpz_init(d);
     mpz_invert(d, e, x);
@@ -188,8 +188,8 @@ int main()
 
     mpz_t message, ciphered, deciphered;
     
-    char Message[TAILLE_MAX]; // Message must be a number !
-    Message[0] = 'A' ; // + rand() % (BASE-1) +1;
+    char Message[TAILLE_MAX]; 
+    Message[0] = 'A' ; 
     for(int i=1; i<TAILLE_MAX; i++)
     {
         Message[i] = genChar62();
