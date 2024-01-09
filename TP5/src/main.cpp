@@ -8,6 +8,7 @@
 #include <stdlib.h>   
 #include <time.h>       
 #define TAILLE_MAX  16
+#define BASE 62
 #define BITSTRENGTH 14              /* size of modulus (n) in bits */
 #define PRIMESIZE (BITSTRENGTH / 2) /* size of the primes p and q  */
 
@@ -15,6 +16,32 @@
 
 mpz_t d, e, n;
 mpz_t M, c;
+
+
+
+char genChar64()
+{
+    int r = rand() %3;
+    char c;
+    if(r == 0) // minuscule
+    {
+        r = rand()% 26;
+        c = 'a' + r;
+    }
+    else if(r == 1) // majuscule
+    {
+        r = rand()% 26;
+        c = 'A' + r;
+    }
+    else // chiffre
+    {
+        r = rand()% 10;
+        c = '0' + r;
+    }
+
+    return c;
+}
+
 
 /* Main subroutine */
 int main()
@@ -162,16 +189,16 @@ int main()
     mpz_t message, ciphered, deciphered;
     
     char Message[TAILLE_MAX]; // Message must be a number !
-    Message[0] = '0' + rand() % 9 + 1;
+    Message[0] = 'A' ; // + rand() % (BASE-1) +1;
     for(int i=1; i<TAILLE_MAX; i++)
     {
-        Message[i] = '0' + rand() % 10;
+        Message[i] = genChar64();
     }
     
     mpz_init(message);
     mpz_init(ciphered);
     mpz_init(deciphered);
-    mpz_set_str(message, Message, 10);
+    mpz_set_str(message, Message, BASE);
 
     // Encrypt
     mpz_powm(ciphered, message, e, n);
@@ -181,7 +208,7 @@ int main()
     // Decrypt
     mpz_powm(deciphered, ciphered, d, n);
     char deciphered_str[1000];
-    mpz_get_str(deciphered_str, 10, deciphered);
+    mpz_get_str(deciphered_str, BASE, deciphered);
 
     std::cout << "\nCheck:\n";
     mpz_t check1;
