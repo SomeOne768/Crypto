@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <gmp.h>
+#include <vector>
 
 #define BITSTRENGTH 14 /* size of prime number (p) in bits */
 #define DEBUG true
@@ -15,6 +16,8 @@ int main()
     /* Declare variables */
     int n = 4; // Numbers of users (max)
     int k = 3; // Threshold : minimal number of users => secret
+    mpz_t coeffs[k];
+    mpz_t Y[n];
 
     mpz_t p;  // Prime number
     mpz_t S;  // Secret
@@ -82,23 +85,53 @@ int main()
     /*
      *  Step 3: Initialize Coefficient of polynom
      */
-    mpz_init(a1);
-    mpz_init_set_str(a1, "3", 0);
-    mpz_init(a2);
-    mpz_init_set_str(a2, "10", 0);
+    
+    // mpz_add(coeffs[0], S, 0);
+    // for(int i=1; i<k; i++)
+    // {
+    //     mpz_init(coeffs[i]);
 
-    // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
+    //     // Generate random coeff
+    //     mpz_urandomb(coeffs[i], state, 100);
+    //     // Ensure coeff is inferior to p
+    //     mpz_mod(coeffs[i], coeffs[i], p);
+    // }
 
-    if (DEBUG)
-    {
-        char a1_str[1000];
-        mpz_get_str(a1_str, 10, a1);
-        char a2_str[1000];
-        mpz_get_str(a2_str, 10, a2);
-        char S_str[1000];
-        mpz_get_str(S_str, 10, S);
-        std::cout << "Polynom 'P(X)' = " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
-    }
+    // evaluate the yi
+    // for(unsigned int x=1; x<=n; x++)
+    // { 
+    //     // evaluate polynome
+    //     // yi += a0 = S
+    //     mpz_t yi;
+    //     mpz_init(yi);
+    //     mpz_set_str(yi, "0", 2);
+    //     mpz_add(yi, yi, S);
+
+    //     for(int j=1; j<k; j++)
+    //     {
+    //         // yi += aiX^j
+    //         mpz_t X;
+    //         mpz_init(X);
+    //         mpz_set_ui(X, x^j);
+    //         mpz_mul(X, X, coeffs[j]);
+    //         mpz_add(yi, yi, X);
+    //     }
+
+    //     mpz_set(Y[x-1], yi);
+    // }
+
+    // // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
+
+    // if (DEBUG)
+    // {
+    //     char a1_str[1000];
+    //     mpz_get_str(a1_str, 10, coeffs[1]);
+    //     char a2_str[1000];
+    //     mpz_get_str(a2_str, 10, coeffs[2]);
+    //     char S_str[1000];
+    //     mpz_get_str(S_str, 10, S);
+    //     std::cout << "Polynom 'P(X)' = " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
+    // }
 
     /*
      *  Step 4: Shares computation for each users (xi, yi)
