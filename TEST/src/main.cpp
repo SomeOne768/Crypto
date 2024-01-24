@@ -14,7 +14,7 @@
 int main()
 {
     /* Declare variables */
-    int n = 4; // Numbers of users (max)
+    int n = 6; // Numbers of users (max)
     int k = 3; // Threshold : minimal number of users => secret
     mpz_t coeffs[k];
     mpz_t Y[n];
@@ -57,12 +57,12 @@ int main()
     // Récupération du 1er nombre premier plus grand que p
     mpz_nextprime(p, p);
 
-    if (DEBUG)
-    {
-        char p_str[1000];
-        mpz_get_str(p_str, 10, p);
-        std::cout << "Random Prime 'p' = " << p_str << std::endl;
-    }
+    // if (DEBUG)
+    // {
+    //     char p_str[1000];
+    //     mpz_get_str(p_str, 10, p);
+    //     std::cout << "Random Prime 'p' = " << p_str << std::endl;
+    // }
 
     /*
      *  Step 2: Initialize Secret Number
@@ -76,12 +76,12 @@ int main()
     // Ensure key is inferior to p
     mpz_mod(S, S, p);
 
-    if (DEBUG)
-    {
-        char S_str[1000];
-        mpz_get_str(S_str, 10, S);
-        std::cout << "Secret number 'S' = " << S_str << std::endl;
-    }
+    // if (DEBUG)
+    // {
+    //     char S_str[1000];
+    //     mpz_get_str(S_str, 10, S);
+    //     std::cout << "Secret number 'S' = " << S_str << std::endl;
+    // }
 
     /*
      *  Step 3: Initialize Coefficient of polynom
@@ -126,18 +126,18 @@ int main()
 
     // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
 
-    if (DEBUG)
-    {
-        std::cout << "Polynom 'P(X)' = ";
-        for (int i = 0; i < k; i++)
-        {
+    // if (DEBUG)
+    // {
+    //     std::cout << "Polynom 'P(X)' = ";
+    //     for (int i = 0; i < k; i++)
+    //     {
 
-            char a1_str[1000];
-            mpz_get_str(a1_str, 10, coeffs[i]);
-            std::cout << a1_str << "X^" << i << " + ";
-        }
-        std::cout << "\n";
-    }
+    //         char a1_str[1000];
+    //         mpz_get_str(a1_str, 10, coeffs[i]);
+    //         std::cout << a1_str << "X^" << i << " + ";
+    //     }
+    //     std::cout << "\n";
+    // }
 
     /*
      *  Step 4: Shares computation for each users (xi, yi)
@@ -145,38 +145,51 @@ int main()
 
     // TODO: Delete this part and compute the shares of all users with public login
 
-    if (DEBUG)
-    {
-        std::cout << "Login and share of each users : \n";
-        for (int x = 1; x <= n; x++)
-        {
+    // if (DEBUG)
+    // {
+    //     std::cout << "Login and share of each users : \n";
+    //     for (int x = 1; x <= n; x++)
+    //     {
 
-            char x1_str[1000];
-            sprintf(x1_str, "%d", x);
-            char y1_str[1000];
-            mpz_get_str(x1_str, 10, Y[x - 1]);
+    //         char x1_str[1000];
+    //         sprintf(x1_str, "%d", x);
+    //         char y1_str[1000];
+    //         mpz_get_str(x1_str, 10, Y[x - 1]);
 
-            std::cout << "( x" << x << "=" << x1_str << " ; y" << x << "=" << y1_str << " ) \n";
-        }
-    }
+    //         std::cout << "( x" << x << "=" << x1_str << " ; y" << x << "=" << y1_str << " ) \n";
+    //     }
+    // }
 
     /*
      *  Step 5: Sample for reconstruct the secret with 3 users (x1, x2, x3)
      */
     // evaluate the alphai
-    for (unsigned int xi = 1; xi <= k; xi++)
+
+    mpz_set_str(coeffs[0], "1234", 10);
+    mpz_set_str(coeffs[0], "166", 10);
+    mpz_set_str(coeffs[0], "94", 10);
+
+    mpz_set_str(Y[0], "1494", 10);
+    mpz_set_str(Y[1], "1942", 10);
+    mpz_set_str(Y[2], "2578", 10);
+    mpz_set_str(Y[3], "3402", 10);
+    mpz_set_str(Y[4], "4414", 10);
+    mpz_set_str(Y[5], "5614", 10);
+
+    mpz_set_str(S, "1234", 10);
+
+    for (int xi = 1; xi <= k; xi++)
     {
         mpz_t ai;
         mpz_init(ai);
         mpz_set_str(ai, "1", 10);
 
-   
-        for (unsigned int xj = 1; xj <= k; xj++)
+        for (int xj = 1; xj <= k; xj++)
         {
             if (xj != xi)
             {
                 // ai *= xj / (xj - xi)
-               
+
                 mpz_t X;
                 mpz_init(X);
 
@@ -184,16 +197,30 @@ int main()
                 mpz_set_ui(X, xj);
                 mpz_mul(ai, X, ai);
 
+                char tmp345454654465465416541654684768486847[1000];
+                mpz_get_str(tmp345454654465465416541654684768486847, 10, ai);
+                std::cout << "afefezffzezef" << xi << "=" << tmp345454654465465416541654684768486847 << "\n";
+
                 // ai /= (xj - xi)
-                mpz_set_ui(X, xj - xi);
-                mpz_div(ai, ai, X);
+                mpz_t tmp65444646464;
+                mpz_init(tmp65444646464);
+                mpz_set_si(X, xj - xi);
+                mpz_div(tmp65444646464, ai, X);
+                mpz_mul(ai, ai, tmp65444646464);
+
+                mpz_get_str(tmp345454654465465416541654684768486847, 10, tmp65444646464);
+                std::cout << "invert" << "=" << tmp345454654465465416541654684768486847 << "\n";
+
             }
         }
 
         mpz_init(alphas[xi - 1]);
         mpz_set(alphas[xi - 1], ai);
-    }
 
+        char tmp[1000];
+        mpz_get_str(tmp, 10, alphas[xi - 1]);
+        std::cout << "a" << xi << "=" << tmp << "\n";
+    }
 
     // TODO: Delete this part and automatically compute the secret with k or more shares
 
@@ -203,11 +230,11 @@ int main()
 
     mpz_init(temp);
 
-    for(unsigned int i=1; i<=k; i++)
+    for (unsigned int i = 1; i <= k; i++)
     {
         mpz_set_str(temp, "0", 10);
         // Sr += alphas[i-1] * Y[i-1];
-        mpz_mul(temp, alphas[i-1], Y[i-1]);
+        mpz_mul(temp, alphas[i - 1], Y[i - 1]);
         mpz_add(Sr, Sr, temp);
     }
 
