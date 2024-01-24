@@ -29,6 +29,11 @@ int main()
     mpz_t x1, x2, x3, x4; // Login users
     mpz_t y1, y2, y3, y4; // Shares of users
 
+    mpz_t neutre;
+
+    mpz_init(neutre);
+    mpz_set_str(neutre, "0", 10);
+
     /* This function creates the shares computation. The basic algorithm is...
      *
      *  1. Initialize Prime Number : we work into Z/pZ
@@ -85,53 +90,55 @@ int main()
     /*
      *  Step 3: Initialize Coefficient of polynom
      */
-    
-    // mpz_add(coeffs[0], S, 0);
-    // for(int i=1; i<k; i++)
-    // {
-    //     mpz_init(coeffs[i]);
 
-    //     // Generate random coeff
-    //     mpz_urandomb(coeffs[i], state, 100);
-    //     // Ensure coeff is inferior to p
-    //     mpz_mod(coeffs[i], coeffs[i], p);
-    // }
+    mpz_add(coeffs[0], S, neutre);
+    for (int i = 1; i < k; i++)
+    {
+        mpz_init(coeffs[i]);
+
+        // Generate random coeff
+        mpz_urandomb(coeffs[i], state, 100);
+        // Ensure coeff is inferior to p
+        mpz_mod(coeffs[i], coeffs[i], p);
+    }
 
     // evaluate the yi
-    // for(unsigned int x=1; x<=n; x++)
-    // { 
-    //     // evaluate polynome
-    //     // yi += a0 = S
-    //     mpz_t yi;
-    //     mpz_init(yi);
-    //     mpz_set_str(yi, "0", 2);
-    //     mpz_add(yi, yi, S);
+    for (unsigned int x = 1; x <= n; x++)
+    {
+        // evaluate polynome
+        // yi += a0 = S
+        mpz_t yi;
+        mpz_init(yi);
+        mpz_set_str(yi, "0", 2);
+        mpz_add(yi, yi, S);
 
-    //     for(int j=1; j<k; j++)
-    //     {
-    //         // yi += aiX^j
-    //         mpz_t X;
-    //         mpz_init(X);
-    //         mpz_set_ui(X, x^j);
-    //         mpz_mul(X, X, coeffs[j]);
-    //         mpz_add(yi, yi, X);
-    //     }
+        for (int j = 1; j < k; j++)
+        {
+            // yi += aiX^j
+            mpz_t X;
+            mpz_init(X);
+            mpz_set_ui(X, x ^ j);
+            mpz_mul(X, X, coeffs[j]);
+            mpz_add(yi, yi, X);
+        }
 
-    //     mpz_set(Y[x-1], yi);
-    // }
+        mpz_set(Y[x - 1], yi);
+    }
 
-    // // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
+    // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
 
-    // if (DEBUG)
-    // {
-    //     char a1_str[1000];
-    //     mpz_get_str(a1_str, 10, coeffs[1]);
-    //     char a2_str[1000];
-    //     mpz_get_str(a2_str, 10, coeffs[2]);
-    //     char S_str[1000];
-    //     mpz_get_str(S_str, 10, S);
-    //     std::cout << "Polynom 'P(X)' = " << a2_str << "X^2 + " << a1_str << "X + " << S_str << std::endl;
-    // }
+    if (DEBUG)
+    {
+        std::cout << "Polynom 'P(X)' = "; 
+        for (int i = 0; i < k; i++)
+        {
+            
+            char a1_str[1000];
+            mpz_get_str(a1_str, 10, coeffs[i]);
+            std::cout << a1_str << "X^" << i << " + ";
+        }
+        std::cout << "\n"; 
+    }
 
     /*
      *  Step 4: Shares computation for each users (xi, yi)
@@ -228,8 +235,6 @@ int main()
     mpz_clear(alpha1);
     mpz_clear(alpha2);
     mpz_clear(alpha3);
-    mpz_clear(a1);
-    mpz_clear(a2);
     mpz_clear(temp);
     mpz_clear(Sr);
     mpz_clear(S);
