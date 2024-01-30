@@ -11,9 +11,8 @@
 #define BITSTRENGTH 14 /* size of prime number (p) in bits */
 #define DEBUG true
 #define MAXRAND 100000000000
-#define MAXN 50
 
-void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
+void evaluateYi(mpz_t S, mpz_t Y[], mpz_t coeffs[], int i)
 {
     // evaluate the yi
     mpz_t yi;
@@ -28,7 +27,9 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
         mpz_init(X);
         mpz_t Y;
         mpz_init(Y);
-        mpz_set_ui(Y, x);
+        mpz_set_ui(Y,i);
+        // mpz_set_ui(Y, x^j);
+
         mpz_pow_ui(X, Y, j);
         mpz_mul(X, X, coeffs[j]);
         mpz_add(yi, yi, X);
@@ -41,20 +42,8 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
     mpz_set(Y[x - 1], yi);
     mpz_clear(yi);
 }
+    
 
-void displayShares(mpz_t Y[], int n)
-{
-    std::cout << "Login and share of each users : \n";
-    for (int x = 1; x <= n; x++)
-    {
-        char x1_str[1000];
-        sprintf(x1_str, "%d", x);
-        char y1_str[1000];
-        mpz_get_str(y1_str, 10, Y[x - 1]);
-
-        std::cout << "( x" << x << "=" << x1_str << " ; y" << x << "=" << y1_str << " ) \n";
-    }
-}
 
 /* Main subroutine */
 int main()
@@ -64,7 +53,7 @@ int main()
     int n = 4; // Numbers of users (max)
     int k = 3; // Threshold : minimal number of users => secret
     mpz_t coeffs[k];
-    mpz_t Y[MAXN];
+    mpz_t *Y[n];
     mpz_t alphas[k];
 
     mpz_t p;  // Prime number
@@ -99,6 +88,7 @@ int main()
     int r = rand() % MAXRAND + 1;
     std::cout << r << "\n";
     gmp_randseed_ui(state, r);
+    std::cout << "\n\n\n\n\n\n\n";
 
     /************************* generation de p ***********************************/
     // Génération d'un nombre aléatoire < a 2¹⁰⁰
@@ -153,7 +143,34 @@ int main()
     // evaluate the yi
     for (int x = 1; x <= n; x++)
     {
-        evaluateYi(coeffs, Y, S, p, x, k);
+        // evaluate polynome
+        // yi += a0 = S
+        mpz_t yi;
+        mpz_init(yi);
+        mpz_set_str(yi, "0", 2);
+        mpz_add(yi, yi, S);
+
+        for (int j = 1; j < k; j++)
+        {
+            // yi += aiX^j
+            mpz_t X;
+            mpz_init(X);
+            mpz_t Y;
+            mpz_init(Y);
+            mpz_set_ui(Y, x);
+            // mpz_set_ui(Y, x^j);
+
+            mpz_pow_ui(X, Y, j);
+            mpz_mul(X, X, coeffs[j]);
+            mpz_add(yi, yi, X);
+            mpz_mod(yi, yi, p);
+            mpz_clear(X);
+            mpz_clear(Y);
+        }
+
+        mpz_init(Y[x - 1]);
+        mpz_set(Y[x - 1], yi);
+        mpz_clear(yi);
     }
 
     // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
@@ -178,9 +195,17 @@ int main()
 
     if (DEBUG)
     {
-        displayShares(Y, n);
-    }
+        std::cout << "Login and share of each users : \n";
+        for (int x = 1; x <= n; x++)
+        {
+            char x1_str[1000];
+            sprintf(x1_str, "%d", x);
+            char y1_str[1000];
+            mpz_get_str(y1_str, 10, Y[x - 1]);
 
+            std::cout << "( x" << x << "=" << x1_str << " ; y" << x << "=" << y1_str << " ) \n";
+        }
+    }
 
     /*
      *  Step 5: Sample for reconstruct the secret with 3 users (x1, x2, x3)
@@ -225,9 +250,14 @@ int main()
         mpz_clear(ai);
     }
 
+    // TODO: Delete this part and automatically compute the secret with k or more shares
+
     // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
     mpz_init(Sr);
+    // mpz_init_set_str(Sr, "0", 10);
+
     mpz_init(temp);
+
     for (unsigned int i = 1; i <= k; i++)
     {
         mpz_set_str(temp, "0", 10);
@@ -244,56 +274,6 @@ int main()
         mpz_get_str(Sr_str, 10, Sr);
         std::cout << "Reconstruction of the secret : S = " << Sr_str << std::endl;
     }
-
-
-    int choice;
-    do
-    {
-        std::cout << "\nMenu:\n";
-        std::cout << "1. Afficher le polynome\n";
-        std::cout << "2. Augmenter le nombre de parts\n";
-        std::cout << "3. Quitter\n";
-        std::cout << "Entrez votre choix (1-3): ";
-        std::cin >> choice;
-
-        switch (choice)
-        {
-        case 1:
-            // Afficher le polynôme
-            std::cout << "Polynome 'P(X)' = ";
-            for (int i = 0; i < k; i++)
-            {
-                char a1_str[1000];
-                mpz_get_str(a1_str, 10, coeffs[i]);
-                std::cout << a1_str << "X^" << i << " + ";
-            }
-            std::cout << "\n";
-            displayShares(Y, n);
-            break;
-
-        case 2:
-            // Augmenter le nombre de parts
-            std::cout << "Entrez le nombre de nouvelles parts à ajouter : ";
-            int increasing;
-            std::cin >> increasing;
-
-            for (int j = 1; j <= increasing; j++)
-                evaluateYi(coeffs, Y, S, p, n + j, k);
-
-            n += increasing;
-
-            std::cout << "Parts mises à jour après augmentation :\n";
-            displayShares(Y, n);
-            break;
-        case 3:
-            // Quitter le programme
-            break;
-        default:
-            std::cout << "Choix invalide. Veuillez réessayer.\n";
-        }
-    } while (choice != 3);
-
-
 
     /* Clean up the GMP integers */
     for (int i = 0; i < k; i++)
