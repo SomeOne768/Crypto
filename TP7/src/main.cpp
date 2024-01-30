@@ -21,6 +21,7 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
     mpz_set_str(yi, "0", 2);
     mpz_add(yi, yi, S);
 
+    // In our case xi = i
     for (int j = 1; j < k; j++)
     {
         // yi += aiX^j
@@ -33,6 +34,7 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
         mpz_mul(X, X, coeffs[j]);
         mpz_add(yi, yi, X);
         mpz_mod(yi, yi, p);
+
         mpz_clear(X);
         mpz_clear(Y);
     }
@@ -77,25 +79,10 @@ int main()
     mpz_init(neutre);
     mpz_set_str(neutre, "0", 10);
 
-    /* This function creates the shares computation. The basic algorithm is...
-     *
-     *  1. Initialize Prime Number : we work into Z/pZ
-     *  2. Initialize Secret Number : S
-     *  3. Compute a random polynom of order k-1
-     *  4. Shares computation for each users (xi, yi) for i in [1,n]
-     *  5. Reconstruct the secret with k users or more
-     *
-     */
-
-    /*
-     *  Step 1: Initialize Prime Number : we work into Z/pZ
-     */
-
     // Inititialisation du nombre aléatoire et de la seed
     mpz_init(p);
-    gmp_randstate_t state;
+    gmp_randstate_t state; 
     gmp_randinit_default(state);
-
     int r = rand() % MAXRAND + 1;
     std::cout << r << "\n";
     gmp_randseed_ui(state, r);
@@ -114,11 +101,7 @@ int main()
         std::cout << "Random Prime 'p' = " << p_str << std::endl;
     }
 
-    /*
-     *  Step 2: Initialize Secret Number
-     */
     /************************* generation de key modulus p so S < P ***********************************/
-
     mpz_init(S);
 
     // Generate random key
@@ -133,11 +116,10 @@ int main()
         std::cout << "Secret number 'S' = " << S_str << std::endl;
     }
 
-    /*
-     *  Step 3: Initialize Coefficient of polynom
-     */
-
+    // Initialize Coefficient of polynom
     mpz_init(coeffs[0]);
+
+    // coeffs[0] = key
     mpz_add(coeffs[0], S, neutre);
 
     for (int i = 1; i < k; i++)
