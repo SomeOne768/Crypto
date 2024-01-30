@@ -13,11 +13,24 @@
 #define MAXRAND 100000000000
 #define MAXN 50
 
+
+/**
+ * @brief evaluate a new shares of the secret
+ * 
+ * @param coeffs the coefficient of our current polynome
+ * @param Y array where shares are saved
+ * @param S Secret
+ * @param p prime modulus
+ * @param x numero of the shares to be evaluate (must be croissant)
+ * @param k Threshold, the number of required shares to find the secret
+*/
 void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
 {
-    // evaluate the yi
+    // evaluate the yi = a0 + a1X + a2X² ... 
     mpz_t yi;
     mpz_init(yi);
+
+    // a0 = S
     mpz_set_str(yi, "0", 2);
     mpz_add(yi, yi, S);
 
@@ -29,9 +42,17 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
         mpz_init(X);
         mpz_t Y;
         mpz_init(Y);
+
+        // Y = x_i
         mpz_set_ui(Y, x);
+
+        // X = x_i^j
         mpz_pow_ui(X, Y, j);
+
+        // X = a_i * x_i^j
         mpz_mul(X, X, coeffs[j]);
+
+        // yi += a_i * x_i^j
         mpz_add(yi, yi, X);
         mpz_mod(yi, yi, p);
 
@@ -39,6 +60,7 @@ void evaluateYi(mpz_t coeffs[], mpz_t Y[], mpz_t S, mpz_t p, int x, int k)
         mpz_clear(Y);
     }
 
+    // inserting new value
     mpz_init(Y[x - 1]);
     mpz_set(Y[x - 1], yi);
     mpz_clear(yi);
@@ -65,9 +87,10 @@ int main()
     /* Declare variables */
     int n = 4; // Numbers of users (max)
     int k = 3; // Threshold : minimal number of users => secret
-    mpz_t coeffs[k];
-    mpz_t Y[MAXN];
-    mpz_t alphas[k];
+    
+    mpz_t coeffs[k]; // represent the value of the ai (coefficients of the polynome)
+    mpz_t Y[MAXN]; // represent the value of the yi
+    mpz_t alphas[k]; // represent the value of alphas considering lagrange polynome (alpha_i = Li (0))
 
     mpz_t p;  // Prime number
     mpz_t S;  // Secret
@@ -75,7 +98,6 @@ int main()
     mpz_t temp;
 
     mpz_t neutre;
-
     mpz_init(neutre);
     mpz_set_str(neutre, "0", 10);
 
@@ -138,7 +160,6 @@ int main()
         evaluateYi(coeffs, Y, S, p, x, k);
     }
 
-    // TODO: Delete this part and compute the coeffiecients randomly ( warning: inside Z/pZ )
 
     if (DEBUG)
     {
@@ -152,21 +173,14 @@ int main()
         std::cout << "\n";
     }
 
-    /*
-     *  Step 4: Shares computation for each users (xi, yi)
-     */
-
-    // TODO: Delete this part and compute the shares of all users with public login
-
+    // Shares computation for each users (xi, yi)
     if (DEBUG)
     {
         displayShares(Y, n);
     }
 
 
-    /*
-     *  Step 5: Sample for reconstruct the secret with 3 users (x1, x2, x3)
-     */
+    // Sample for reconstruct the secret with k users
     // evaluate the alphai
     for (unsigned int xi = 1; xi <= k; xi++)
     {
@@ -179,35 +193,36 @@ int main()
             if (xj != xi)
             {
                 // ai *= xj / (xj - xi)
-
                 mpz_t X;
                 mpz_init(X);
 
                 mpz_t Xi;
                 mpz_init(Xi);
                 mpz_set_ui(Xi, xi);
-                // ai *= xj
                 mpz_set_ui(X, xj);
+
+                // ai *= xj
                 mpz_mul(ai, X, ai);
 
-                // ai *= (xj - xi)^(-1)
+                // ai *= (xj - xi)^(-1) // => ai /= (xj - xi)
                 mpz_sub(X, X, Xi);
                 mpz_invert(X, X, p); // the modular inverse
                 mpz_mul(ai, ai, X);
-
                 mpz_mod(ai, ai, p);
 
+                // clear
                 mpz_clear(X);
                 mpz_clear(Xi);
             }
         }
 
+        // Insert values into corresponding tab
         mpz_init(alphas[xi - 1]);
         mpz_set(alphas[xi - 1], ai);
         mpz_clear(ai);
     }
 
-    // Compute Secret = sum_{i=1}^{k} alpha_i x y_i
+    // Compute Secret = sum_{i=1}^{k} alpha_i x y_i to find the secret
     mpz_init(Sr);
     mpz_init(temp);
     for (unsigned int i = 1; i <= k; i++)
@@ -220,6 +235,7 @@ int main()
 
     mpz_mod(Sr, Sr, p);
 
+    // Display the secret
     if (DEBUG)
     {
         char Sr_str[1000];
@@ -228,6 +244,7 @@ int main()
     }
 
 
+    // Menu to do everything above and add the possiblity have more shares
     int choice;
     do
     {
